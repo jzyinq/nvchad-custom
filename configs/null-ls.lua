@@ -3,7 +3,9 @@ local null_ls = require "null-ls"
 local b = null_ls.builtins
 local line_length = 120
 local sources = {
-
+  -- general
+  -- change json formatting indent to 2 lines instead of four (default)
+  b.formatting.clang_format.with { extra_args = { "-s", "2" } },
   -- webdev stuff
   b.formatting.deno_fmt, -- choosed deno for ts/js files cuz its very fast!
   b.formatting.prettier.with { filetypes = { "html", "markdown", "css" } }, -- so prettier works only on these filetypes
@@ -12,7 +14,7 @@ local sources = {
   b.formatting.stylua,
 
   -- JavaScript
-  b.formatting.prettier.with { extra_args = { "--print-width", line_length , "--tab-width", 4} },
+  b.formatting.prettier.with { extra_args = { "--print-width", line_length , "--tab-width", 2} },
 
   -- XML
   b.formatting.xmlformat,
