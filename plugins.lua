@@ -132,10 +132,6 @@ local plugins = {
     end,
     dependencies = "nvim-lua/plenary.nvim",
   },
-  {
-    "Pocco81/auto-save.nvim",
-    event = "BufRead",
-  },
   { "kevinhwang91/nvim-bqf", event = "VeryLazy" },
   {
     "SmiteshP/nvim-navbuddy",
