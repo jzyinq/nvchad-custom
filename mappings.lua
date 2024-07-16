@@ -11,6 +11,9 @@ M.general = {
   n = {
     [";"] = { ":", "enter command mode", opts = { nowait = true } },
   },
+  i = {
+    ["<S-Tab>"] = {"<C-d>", "Unindent line"},
+  }
 }
 M.navbuddy = {
   n = {

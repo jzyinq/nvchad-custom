@@ -10,6 +10,7 @@ local plugins = {
 
       sources = {
         { name = "copilot", group_index = 2 },
+        { name = "emoji" },
         { name = "nvim_lsp" },
         { name = "luasnip" },
         { name = "buffer" },
@@ -140,7 +141,7 @@ local plugins = {
       "neovim/nvim-lspconfig",
       "SmiteshP/nvim-navic",
       "MunifTanjim/nui.nvim",
-      "numToStr/Comment.nvim", -- Optional
+      "numToStr/Comment.nvim",         -- Optional
       "nvim-telescope/telescope.nvim", -- Optional
     },
     config = function()
@@ -193,7 +194,7 @@ local plugins = {
           message = function() -- message to print on save
             return ("AutoSave: saved at " .. vim.fn.strftime "%H:%M:%S")
           end,
-          dim = 0.18, -- dim the color of `message`
+          dim = 0.18,               -- dim the color of `message`
           cleaning_interval = 1250, -- (milliseconds) automatically clean MsgArea after displaying `message`. See :h MsgArea
         },
       }
@@ -225,10 +226,49 @@ local plugins = {
     dependencies = { "zbirenbaum/copilot.lua" },
     config = function()
       vim.defer_fn(function()
-        require("copilot").setup() -- https://github.com/zbirenbaum/copilot.lua/blob/master/README.md#setup-and-configuration
+        require("copilot").setup()     -- https://github.com/zbirenbaum/copilot.lua/blob/master/README.md#setup-and-configuration
         require("copilot_cmp").setup() -- https://github.com/zbirenbaum/copilot-cmp/blob/master/README.md#configuration
       end, 100)
     end,
+  },
+  {
+    "kdheepak/lazygit.nvim",
+    cmd = {
+      "LazyGit",
+      "LazyGitConfig",
+      "LazyGitCurrentFile",
+      "LazyGitFilter",
+      "LazyGitFilterCurrentFile",
+    },
+    -- optional for floating window border decoration
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+    },
+    -- setting the keybinding for LazyGit with 'keys' is recommended in
+    -- order to load the plugin when the command is run for the first time
+    keys = {
+      { "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
+    },
+  },
+  {
+    "CopilotC-Nvim/CopilotChat.nvim",
+    branch = "canary",
+    dependencies = {
+      { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
+      { "nvim-lua/plenary.nvim" },  -- for curl, log wrapper
+    },
+    opts = {
+      debug = true, -- Enable debugging
+      -- See Configuration section for rest
+    },
+    config = function()
+      require("CopilotChat").setup {}
+    end,
+    -- assign gcc hotkey to toggle chat
+    keys = {
+      { "<leader>cp", "<cmd>lua require('CopilotChat').toggle()<cr>", "toggle copilot chat" },
+    },
+    -- See Commands section for default commands if you want to lazy load on them
   },
 }
 
