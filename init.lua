@@ -21,6 +21,7 @@ autocmd("DirChanged", {
     end
   end,
 })
+
 -- autocmd("BufEnter", {
 --   callback = function()
 --     require "async"(function()

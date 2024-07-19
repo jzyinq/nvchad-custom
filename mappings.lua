@@ -12,8 +12,8 @@ M.general = {
     [";"] = { ":", "enter command mode", opts = { nowait = true } },
   },
   i = {
-    ["<S-Tab>"] = {"<C-d>", "Unindent line"},
-  }
+    ["<S-Tab>"] = { "<C-d>", "Unindent line" },
+  },
 }
 M.navbuddy = {
   n = {
@@ -60,6 +60,36 @@ M.python_reference = {
     ["<leader>rd"] = { "<cmd>:PythonCopyReferenceDotted<cr>", "Python dotted reference" },
     ["<leader>rp"] = { "<cmd>:PythonCopyReferencePytest<cr>", "Python pytest reference" },
     ["<leader>ri"] = { "<cmd>:PythonCopyReferenceImport<cr>", "Python import reference" },
+  },
+}
+
+-- vim.keymap.set({"n", "v"}, "<leader>nd", function() M.toggle_checkbox("x") end, { desc="Todo done", noremap = true })
+M.obsidian = {
+  n = {
+    ["<leader>td"] = {
+      function()
+        require('custom.obsidian').toggle_checkbox "x"
+      end,
+      "Todo Create",
+    },
+    ["<leader>tc"] = {
+      function()
+        require('custom.obsidian').toggle_checkbox "-"
+      end,
+      "Todo Abandoned",
+    },
+    ["<leader>tt"] = {
+      function()
+        require('custom.obsidian').toggle_checkbox " "
+      end,
+      "Todo toggle",
+    },
+    ["<leader>tr"] = {
+      function()
+        require('custom.obsidian').toggle_checkbox()
+      end,
+      "Todo toggle",
+    },
   },
 }
 
