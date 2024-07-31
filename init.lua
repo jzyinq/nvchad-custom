@@ -22,6 +22,8 @@ autocmd("DirChanged", {
   end,
 })
 
+opt.relativenumber = true
+
 -- autocmd("BufEnter", {
 --   callback = function()
 --     require "async"(function()

@@ -63,34 +63,52 @@ M.python_reference = {
   },
 }
 
--- vim.keymap.set({"n", "v"}, "<leader>nd", function() M.toggle_checkbox("x") end, { desc="Todo done", noremap = true })
-M.obsidian = {
-  n = {
-    ["<leader>td"] = {
-      function()
-        require('custom.obsidian').toggle_checkbox "x"
-      end,
-      "Todo Create",
-    },
-    ["<leader>tc"] = {
-      function()
-        require('custom.obsidian').toggle_checkbox "-"
-      end,
-      "Todo Abandoned",
-    },
-    ["<leader>tt"] = {
-      function()
-        require('custom.obsidian').toggle_checkbox " "
-      end,
-      "Todo toggle",
-    },
-    ["<leader>tr"] = {
-      function()
-        require('custom.obsidian').toggle_checkbox()
-      end,
-      "Todo toggle",
-    },
+local task_mappings = {
+  ["<leader>td"] = {
+    function()
+      require("custom.obsidian").toggle_checkbox "x"
+    end,
+    "Todo Create",
+    mode = { "n", "v" },
   },
+  ["<leader>ta"] = {
+    function()
+      require("custom.obsidian").toggle_checkbox "-"
+    end,
+    "Todo Abandoned",
+    mode = { "n", "v" },
+  },
+  ["<leader>ti"] = {
+    function()
+      require("custom.obsidian").toggle_checkbox ">"
+    end,
+    "Todo Abandoned",
+    mode = { "n", "v" },
+  },
+  ["<leader>tt"] = {
+    function()
+      require("custom.obsidian").toggle_checkbox " "
+    end,
+    "Todo toggle",
+    mode = { "n", "v" },
+  },
+  ["<leader>tr"] = {
+    function()
+      require("custom.obsidian").toggle_checkbox()
+    end,
+    "Todo toggle",
+    mode = { "n", "v" },
+  },
+  ["<leader>go"] = {
+    "<cmd>:ObsidianOpen<cr>",
+    "Open note in Obsidian",
+    mode = { "n", "v" },
+  },
+}
+
+M.obsidian = {
+  n = task_mappings,
+  v = task_mappings,
 }
 
 return M
