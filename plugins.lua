@@ -383,8 +383,8 @@ local plugins = {
     lazy = true,
     -- assign gcc hotkey to toggle chat
     keys = {
-      { "gf", ":OpenInGHFile <CR>",      mode = { "n" } },
-      { "gf", ":OpenInGHFileLines <CR>", mode = { "v" } },
+      { "gh", ":OpenInGHFile <CR>",      mode = { "n" } },
+      { "gh", ":OpenInGHFileLines <CR>", mode = { "v" } },
     },
   },
 }
