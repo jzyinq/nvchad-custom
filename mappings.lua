@@ -28,6 +28,12 @@ M.telescope_project = {
       ":lua require'telescope'.extensions.project.project{display_type = 'full'}<CR>",
       "Select project",
     },
+    ["<leader>tf"] = {
+      function()
+        require("custom.obsidian").search_incomplete_tasks()
+      end,
+      "Tasks filter",
+    },
   },
 }
 
@@ -78,11 +84,25 @@ local task_mappings = {
     "Todo Abandoned",
     mode = { "n", "v" },
   },
+  ["<leader>tq"] = {
+    function()
+      require("custom.obsidian").toggle_checkbox "?"
+    end,
+    "Todo Question",
+    mode = { "n", "v" },
+  },
   ["<leader>ti"] = {
     function()
       require("custom.obsidian").toggle_checkbox ">"
     end,
     "Todo Abandoned",
+    mode = { "n", "v" },
+  },
+  ["<leader>tw"] = {
+    function()
+      require("custom.obsidian").toggle_checkbox "!"
+    end,
+    "Todo toggle",
     mode = { "n", "v" },
   },
   ["<leader>tt"] = {
