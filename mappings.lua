@@ -10,6 +10,10 @@ M.disabled = {
 M.general = {
   n = {
     [";"] = { ":", "enter command mode", opts = { nowait = true } },
+    ["<leader>ww"] = {
+      ":w !sudo tee %<CR>",
+      "Write file with sudo",
+    },
   },
   i = {
     ["<S-Tab>"] = { "<C-d>", "Unindent line" },
