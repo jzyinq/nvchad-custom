@@ -7,9 +7,6 @@ local sources = {
   -- change json formatting indent to 2 lines instead of four (default)
   b.formatting.clang_format.with { extra_args = { "-s", "2" } },
   -- webdev stuff
-  b.formatting.deno_fmt.with {
-    extra_args = { "--line-width", tostring(line_length), "--indent-width", 2 },
-  }, -- choosed deno for ts/js files cuz its very fast!
   b.formatting.prettier.with {
     filetypes = { "html", "markdown", "css" },
     extra_args = { "--print-width", tostring(line_length), "--tab-width", 2 },
@@ -20,9 +17,6 @@ local sources = {
 
   -- JavaScript
   b.formatting.prettier.with { extra_args = { "--print-width", tostring(line_length), "--tab-width", 2 } },
-
-  -- XML
-  b.formatting.xmlformat,
 
   -- Golang
   b.formatting.djlint,

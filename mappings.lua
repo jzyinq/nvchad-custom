@@ -34,6 +34,10 @@ M.telescope_project = {
       end,
       "Tasks filter",
     },
+    ["<leader>th"] = {
+      ":lua require('telescope.builtin').command_history()<CR>",
+      "Command History",
+    },
   },
 }
 
