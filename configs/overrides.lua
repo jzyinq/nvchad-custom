@@ -12,6 +12,15 @@ M.treesitter = {
     "c",
     "markdown",
     "markdown_inline",
+    "json",
+    "python",
+    "go",
+    "yaml",
+    "bash",
+  },
+  highlight = {
+    enable = true,
+    additional_vim_regex_highlighting = false,
   },
   indent = {
     enable = true,
