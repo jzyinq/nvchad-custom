@@ -8,15 +8,18 @@ local sources = {
   b.formatting.clang_format.with { extra_args = { "-s", "2" } },
   -- webdev stuff
   b.formatting.prettier.with {
-    filetypes = { "html", "markdown", "css" },
+    filetypes = { "html", "markdown", "css", "javascript", "typescript", "javascriptreact", "typescriptreact" },
     extra_args = { "--print-width", tostring(line_length), "--tab-width", 2 },
-  }, -- so prettier works only on these filetypes
+  },
+
+  -- JSON formatting
+  b.formatting.prettier.with {
+    filetypes = { "json", "jsonc" },
+    extra_args = { "--print-width", tostring(line_length), "--tab-width", 2 },
+  },
 
   -- Lua
   b.formatting.stylua,
-
-  -- JavaScript
-  b.formatting.prettier.with { extra_args = { "--print-width", tostring(line_length), "--tab-width", 2 } },
 
   -- Golang
   b.formatting.djlint,
