@@ -387,6 +387,19 @@ local plugins = {
       { "gh", ":OpenInGHFileLines <CR>", mode = { "v" } },
     },
   },
+  {
+    "m4xshen/hardtime.nvim",
+    lazy = false,
+    dependencies = { "MunifTanjim/nui.nvim" },
+    opts = {
+      disabled_keys = {
+        ["<Up>"] = false,    -- Allow <Up> key
+        ["<Down>"] = false,
+        ["<Left>"] = false,  -- Allow <Left> key
+        ["<Right>"] = false, -- Allow <Right> key
+      },
+    },
+  },
 }
 
 return plugins
