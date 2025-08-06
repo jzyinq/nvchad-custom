@@ -42,6 +42,10 @@ M.telescope_project = {
       ":lua require('telescope.builtin').command_history()<CR>",
       "Command History",
     },
+    ["<leader>tn"] = {
+      ":Telescope notify<CR>",
+      "Notifications",
+    },
   },
 }
 
