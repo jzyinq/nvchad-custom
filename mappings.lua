@@ -46,6 +46,10 @@ M.telescope_project = {
       ":Telescope notify<CR>",
       "Notifications",
     },
+    ["<leader>tk"] = {
+      ":Telescope keymaps<CR>",
+      "Key bindings",
+    },
   },
 }
 
@@ -146,13 +150,18 @@ local task_mappings = {
     "Obsidian today",
     mode = { "n", "v" },
   },
-  ["<leader>od"] = {
-    "<cmd>Obsidian today<cr>",
-    "Obsidian today",
+  ["<leader>ott"] = {
+    "<cmd>Obsidian tomorrow<cr>",
+    "Obsidian tomorrow",
     mode = { "n", "v" },
   },
-  ["<leader>ot"] = {
-    "<cmd>Obsidian tomorrow<cr>",
+  ["<leader>otd"] = {
+    "<cmd>Obsidian today<cr>",
+    "Obsidian tomorrow",
+    mode = { "n", "v" },
+  },
+  ["<leader>otg"] = {
+    "<cmd>Obsidian tags<cr>",
     "Obsidian tomorrow",
     mode = { "n", "v" },
   },
