@@ -141,6 +141,31 @@ local task_mappings = {
     "Obsidian backlinks",
     mode = { "n", "v" },
   },
+  ["<leader>oo"] = {
+    "<cmd>Obsidian dailies<cr>",
+    "Obsidian today",
+    mode = { "n", "v" },
+  },
+  ["<leader>od"] = {
+    "<cmd>Obsidian today<cr>",
+    "Obsidian today",
+    mode = { "n", "v" },
+  },
+  ["<leader>ot"] = {
+    "<cmd>Obsidian tomorrow<cr>",
+    "Obsidian tomorrow",
+    mode = { "n", "v" },
+  },
+  ["<leader>oy"] = {
+    "<cmd>Obsidian yesterday<cr>",
+    "Obsidian yesterday",
+    mode = { "n", "v" },
+  },
+  ["<leader>ol"] = {
+    "<cmd>Obsidian links<cr>",
+    "Obsidian links",
+    mode = { "n", "v" },
+  },
 }
 
 M.obsidian = {

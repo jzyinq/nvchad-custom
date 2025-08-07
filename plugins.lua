@@ -364,12 +364,19 @@ local plugins = {
     opts = {
 
       legacy_commands = false,
+      daily_notes = {
+        -- Optional, if you keep daily notes in a separate directory.
+        folder = "daily",
+        -- Optional, if you want `Obsidian yesterday` to return the last work day or `Obsidian tomorrow` to return the next work day.
+        workdays_only = true,
+      },
       workspaces = {
         {
           name = "piwik",
           path = "/home/jzy/homecloud/backups/obsidian/piwik",
         },
       },
+
       -- Optional, by default when you use `:ObsidianFollowLink` on a link to an external
       -- URL it will be ignored but you can customize this behavior here.
       ---@param url string
