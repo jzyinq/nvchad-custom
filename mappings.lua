@@ -136,6 +136,11 @@ local task_mappings = {
     "Open note in Obsidian",
     mode = { "n", "v" },
   },
+  ["<leader>ob"] = {
+    "<cmd>Obsidian backlinks<cr>",
+    "Obsidian backlinks",
+    mode = { "n", "v" },
+  },
 }
 
 M.obsidian = {

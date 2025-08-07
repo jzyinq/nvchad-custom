@@ -344,7 +344,7 @@ local plugins = {
     end,
   },
   {
-    "epwalsh/obsidian.nvim",
+    "obsidian-nvim/obsidian.nvim",
     version = "*", -- recommended, use latest release instead of latest commit
     lazy = true,
     -- ft = "markdown",
@@ -362,6 +362,8 @@ local plugins = {
       -- see below for full list of optional dependencies 👇
     },
     opts = {
+
+      legacy_commands = false,
       workspaces = {
         {
           name = "piwik",
@@ -432,7 +434,7 @@ local plugins = {
     event = "VeryLazy",
     config = function()
       require("notify").setup()
-      vim.notify = require("notify")
+      vim.notify = require "notify"
     end,
   },
 }
