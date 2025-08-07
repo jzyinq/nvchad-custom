@@ -168,6 +168,13 @@ local task_mappings = {
   },
 }
 
+M.jumplist = {
+  n = {
+    ["<M-Left>"] = { "<C-o>", "Jump to previous location" },
+    ["<M-Right>"] = { "<C-i>", "Jump to next location" },
+  },
+}
+
 M.obsidian = {
   n = task_mappings,
   v = task_mappings,
