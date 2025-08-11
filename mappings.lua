@@ -157,12 +157,12 @@ local task_mappings = {
   },
   ["<leader>otd"] = {
     "<cmd>Obsidian today<cr>",
-    "Obsidian tomorrow",
+    "Obsidian today",
     mode = { "n", "v" },
   },
   ["<leader>otg"] = {
     "<cmd>Obsidian tags<cr>",
-    "Obsidian tomorrow",
+    "Obsidian tags",
     mode = { "n", "v" },
   },
   ["<leader>oy"] = {
