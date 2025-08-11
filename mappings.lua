@@ -135,11 +135,6 @@ local task_mappings = {
     "Todo toggle",
     mode = { "n", "v" },
   },
-  ["<leader>go"] = {
-    "<cmd>:ObsidianOpen<cr>",
-    "Open note in Obsidian",
-    mode = { "n", "v" },
-  },
   ["<leader>ob"] = {
     "<cmd>Obsidian backlinks<cr>",
     "Obsidian backlinks",
@@ -147,7 +142,7 @@ local task_mappings = {
   },
   ["<leader>oo"] = {
     "<cmd>Obsidian dailies<cr>",
-    "Obsidian today",
+    "Obsidian dailies",
     mode = { "n", "v" },
   },
   ["<leader>ott"] = {
