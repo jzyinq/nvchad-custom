@@ -17,6 +17,8 @@ M.general = {
   },
   i = {
     ["<S-Tab>"] = { "<C-d>", "Unindent line" },
+    -- save and exit insert mode
+    ["<C-s>"] = { "<ESC>:w<CR>", "Save file and exit insert mode" },
   },
 }
 M.navbuddy = {
@@ -160,7 +162,7 @@ local task_mappings = {
     "Obsidian tags",
     mode = { "n", "v" },
   },
-  ["<leader>oy"] = {
+  ["<leader>oty"] = {
     "<cmd>Obsidian yesterday<cr>",
     "Obsidian yesterday",
     mode = { "n", "v" },
