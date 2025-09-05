@@ -186,4 +186,15 @@ M.obsidian = {
   v = task_mappings,
 }
 
+M.link_utils = {
+  n = {
+    ["<leader>lp"] = {
+      function()
+        require("custom.link_utils").smart_link_paste()
+      end,
+      "Smart link paste",
+    },
+  },
+}
+
 return M
