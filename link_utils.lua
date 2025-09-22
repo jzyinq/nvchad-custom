@@ -25,16 +25,21 @@ end
 local function get_link_text(url)
   local link_text = "web" -- default
 
-  if url:match "github%.com/[^/]+/[^/]+/issues/" then
-    link_text = "github-issue"
-  elseif url:match "github%.com/[^/]+/[^/]+/pull/" then
-    link_text = "github-pr"
+  if url:match "github%.com/[^/]+/[^/]+/issues/(%d+)" then
+    local owner, repo, issue_id = url:match "github%.com/([^/]+)/([^/]+)/issues/(%d+)"
+    link_text = string.format("%s/%s/issues/%s", owner, repo, issue_id)
+  elseif url:match "github%.com/[^/]+/[^/]+/pull/(%d+)" then
+    local owner, repo, pr_id = url:match "github%.com/([^/]+)/([^/]+)/pull/(%d+)"
+    link_text = string.format("%s/%s/pull/%s", owner, repo, pr_id)
   elseif url:match "github%.com/[^/]+/[^/]+/actions" then
-    link_text = "github-actions"
+    local owner, repo = url:match "github%.com/([^/]+)/([^/]+)/actions"
+    link_text = string.format("%s/%s/actions", owner, repo)
   elseif url:match "github%.com/[^/]+/[^/]+/releases" then
-    link_text = "github-releases"
+    local owner, repo = url:match "github%.com/([^/]+)/([^/]+)/releases"
+    link_text = string.format("%s/%s/releases", owner, repo)
   elseif url:match "github%.com/[^/]+/[^/]+/?$" then
-    link_text = "github-repo"
+    local owner, repo = url:match "github%.com/([^/]+)/([^/]+)/?$"
+    link_text = string.format("%s/%s", owner, repo)
   elseif url:match "github%.com" then
     link_text = "github"
   elseif url:match "atlassian%.net/wiki/" then
