@@ -192,7 +192,13 @@ M.link_utils = {
       function()
         require("custom.link_utils").smart_link_paste()
       end,
-      "Smart link paste",
+      "Smart link paste (after cursor)",
+    },
+    ["<leader>lP"] = {
+      function()
+        require("custom.link_utils").smart_link_paste_before()
+      end,
+      "Smart link paste (before cursor)",
     },
   },
 }

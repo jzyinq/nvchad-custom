@@ -1,18 +1,12 @@
 local M = {}
 
-M.smart_link_paste = function()
-  -- Check if we're in a markdown file
-  local filetype = vim.bo.filetype
-  if filetype ~= "markdown" and filetype ~= "mdx" then
-    vim.notify("Smart link paste only works in markdown files", vim.log.levels.WARN)
-    return
-  end
-
+-- Helper function to get and validate clipboard URL
+local function get_clipboard_url()
   -- Get clipboard content
   local clipboard_content = vim.fn.getreg "+"
   if not clipboard_content or clipboard_content == "" then
     vim.notify("No URL in clipboard detected", vim.log.levels.WARN)
-    return
+    return nil
   end
 
   -- Clean the clipboard content (remove whitespace)
@@ -21,35 +15,39 @@ M.smart_link_paste = function()
   -- Basic URL validation
   if not clipboard_content:match "^https?://" then
     vim.notify("No valid URL in clipboard detected", vim.log.levels.WARN)
-    return
+    return nil
   end
 
-  -- Determine link text based on URL domain/path
+  return clipboard_content
+end
+
+-- Helper function to determine link text based on URL
+local function get_link_text(url)
   local link_text = "web" -- default
 
-  if clipboard_content:match "github%.com/[^/]+/[^/]+/issues/" then
+  if url:match "github%.com/[^/]+/[^/]+/issues/" then
     link_text = "github-issue"
-  elseif clipboard_content:match "github%.com/[^/]+/[^/]+/pull/" then
+  elseif url:match "github%.com/[^/]+/[^/]+/pull/" then
     link_text = "github-pr"
-  elseif clipboard_content:match "github%.com/[^/]+/[^/]+/actions" then
+  elseif url:match "github%.com/[^/]+/[^/]+/actions" then
     link_text = "github-actions"
-  elseif clipboard_content:match "github%.com/[^/]+/[^/]+/releases" then
+  elseif url:match "github%.com/[^/]+/[^/]+/releases" then
     link_text = "github-releases"
-  elseif clipboard_content:match "github%.com/[^/]+/[^/]+/?$" then
+  elseif url:match "github%.com/[^/]+/[^/]+/?$" then
     link_text = "github-repo"
-  elseif clipboard_content:match "github%.com" then
+  elseif url:match "github%.com" then
     link_text = "github"
-  elseif clipboard_content:match "atlassian%.net/wiki/" then
+  elseif url:match "atlassian%.net/wiki/" then
     link_text = "confluence"
-  elseif clipboard_content:match "atlassian%.net/browse/" then
+  elseif url:match "atlassian%.net/browse/" then
     link_text = "jira"
-  elseif clipboard_content:match "miro%.com" then
+  elseif url:match "miro%.com" then
     link_text = "miro"
-  elseif clipboard_content:match "slack%.com" then
+  elseif url:match "slack%.com" then
     link_text = "slack"
   else
     -- Extract domain name without TLD extension for default case
-    local domain = clipboard_content:match "https?://([^/]+)"
+    local domain = url:match "https?://([^/]+)"
     if domain then
       -- Remove www. prefix if present
       domain = domain:gsub("^www%.", "")
@@ -61,10 +59,26 @@ M.smart_link_paste = function()
     end
   end
 
-  -- Create markdown link
+  return link_text
+end
+
+M.smart_link_paste = function()
+  -- Check if we're in a markdown file
+  local filetype = vim.bo.filetype
+  if filetype ~= "markdown" and filetype ~= "mdx" then
+    vim.notify("Smart link paste only works in markdown files", vim.log.levels.WARN)
+    return
+  end
+
+  local clipboard_content = get_clipboard_url()
+  if not clipboard_content then
+    return
+  end
+
+  local link_text = get_link_text(clipboard_content)
   local markdown_link = string.format("[%s](%s)", link_text, clipboard_content)
 
-  -- Insert at cursor position
+  -- Insert at cursor position (like 'p' - after cursor)
   local cursor_pos = vim.api.nvim_win_get_cursor(0)
   local current_line = vim.api.nvim_get_current_line()
   local col = cursor_pos[2]
@@ -73,6 +87,38 @@ M.smart_link_paste = function()
   local before = current_line:sub(1, col)
   local after = current_line:sub(col + 1)
   local new_line = before .. " " .. markdown_link .. after
+
+  vim.api.nvim_set_current_line(new_line)
+
+  -- Move cursor to end of inserted link
+  vim.api.nvim_win_set_cursor(0, { cursor_pos[1], col + 1 + #markdown_link })
+end
+
+M.smart_link_paste_before = function()
+  -- Check if we're in a markdown file
+  local filetype = vim.bo.filetype
+  if filetype ~= "markdown" and filetype ~= "mdx" then
+    vim.notify("Smart link paste only works in markdown files", vim.log.levels.WARN)
+    return
+  end
+
+  local clipboard_content = get_clipboard_url()
+  if not clipboard_content then
+    return
+  end
+
+  local link_text = get_link_text(clipboard_content)
+  local markdown_link = string.format("[%s](%s)", link_text, clipboard_content)
+
+  -- Insert before cursor position (like 'P' - before cursor)
+  local cursor_pos = vim.api.nvim_win_get_cursor(0)
+  local current_line = vim.api.nvim_get_current_line()
+  local col = cursor_pos[2]
+
+  -- Split the line at cursor position and insert the link before
+  local before = current_line:sub(1, col)
+  local after = current_line:sub(col + 1)
+  local new_line = before .. markdown_link .. " " .. after
 
   vim.api.nvim_set_current_line(new_line)
 
