@@ -128,7 +128,7 @@ local plugins = {
           -- print the url after performing the action
           print_url = false,
           -- mapping to call url generation
-          mappings = "<leader>gy",
+          mappings = "<leader>gb",
         },
       }
     end,

@@ -28,6 +28,14 @@ local function get_link_text(url)
   if url:match "github%.com/[^/]+/[^/]+/issues/(%d+)" then
     local owner, repo, issue_id = url:match "github%.com/([^/]+)/([^/]+)/issues/(%d+)"
     link_text = string.format("%s/%s/issues/%s", owner, repo, issue_id)
+  elseif url:match "github%.com/[^/]+/[^/]+/pull/%d+/commits/[a-f0-9]+" then
+    local owner, repo, pr_id, commit_hash = url:match "github%.com/([^/]+)/([^/]+)/pull/(%d+)/commits/([a-f0-9]+)"
+    local short_rev = commit_hash:sub(1, 6)
+    link_text = string.format("%s/%s/pull/%s - %s", owner, repo, pr_id, short_rev)
+  elseif url:match "github%.com/[^/]+/[^/]+/commit/[a-f0-9]+" then
+    local owner, repo, commit_hash = url:match "github%.com/([^/]+)/([^/]+)/commit/([a-f0-9]+)"
+    local short_rev = commit_hash:sub(1, 6)
+    link_text = string.format("%s/%s - %s", owner, repo, short_rev)
   elseif url:match "github%.com/[^/]+/[^/]+/pull/(%d+)" then
     local owner, repo, pr_id = url:match "github%.com/([^/]+)/([^/]+)/pull/(%d+)"
     link_text = string.format("%s/%s/pull/%s", owner, repo, pr_id)
