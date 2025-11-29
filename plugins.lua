@@ -9,7 +9,6 @@ local plugins = {
     opts = {
 
       sources = {
-        { name = "copilot", group_index = 2 },
         { name = "emoji" },
         { name = "nvim_lsp" },
         { name = "luasnip" },
@@ -141,7 +140,7 @@ local plugins = {
       "neovim/nvim-lspconfig",
       "SmiteshP/nvim-navic",
       "MunifTanjim/nui.nvim",
-      "numToStr/Comment.nvim",         -- Optional
+      "numToStr/Comment.nvim", -- Optional
       "nvim-telescope/telescope.nvim", -- Optional
     },
     config = function()
@@ -194,7 +193,7 @@ local plugins = {
           message = function() -- message to print on save
             return ("AutoSave: saved at " .. vim.fn.strftime "%H:%M:%S")
           end,
-          dim = 0.18,               -- dim the color of `message`
+          dim = 0.18, -- dim the color of `message`
           cleaning_interval = 1250, -- (milliseconds) automatically clean MsgArea after displaying `message`. See :h MsgArea
         },
       }
@@ -221,17 +220,6 @@ local plugins = {
     event = "BufRead",
   },
   {
-    "zbirenbaum/copilot-cmp",
-    event = "InsertEnter",
-    dependencies = { "zbirenbaum/copilot.lua" },
-    config = function()
-      vim.defer_fn(function()
-        require("copilot").setup()     -- https://github.com/zbirenbaum/copilot.lua/blob/master/README.md#setup-and-configuration
-        require("copilot_cmp").setup() -- https://github.com/zbirenbaum/copilot-cmp/blob/master/README.md#configuration
-      end, 100)
-    end,
-  },
-  {
     "kdheepak/lazygit.nvim",
     cmd = {
       "LazyGit",
@@ -251,26 +239,6 @@ local plugins = {
     },
   },
   {
-    "CopilotC-Nvim/CopilotChat.nvim",
-    branch = "canary",
-    dependencies = {
-      { "zbirenbaum/copilot.lua" }, -- or github/copilot.vim
-      { "nvim-lua/plenary.nvim" },  -- for curl, log wrapper
-    },
-    opts = {
-      debug = true, -- Enable debugging
-      -- See Configuration section for rest
-    },
-    config = function()
-      require("CopilotChat").setup {}
-    end,
-    -- assign gcc hotkey to toggle chat
-    keys = {
-      { "<leader>cp", "<cmd>lua require('CopilotChat').toggle()<cr>", "toggle copilot chat" },
-    },
-    -- See Commands section for default commands if you want to lazy load on them
-  },
-  {
     "chrishrb/gx.nvim",
     keys = { { "gx", "<cmd>Browse<cr>", mode = { "n", "x" } } },
     cmd = { "Browse" },
@@ -285,13 +253,13 @@ local plugins = {
       require("gx").setup {
         open_browser_app = "xdg-open", -- specify your browser app; default for macOS is "open", Linux "xdg-open" and Windows "powershell.exe"
         handlers = {
-          plugin = true,               -- open plugin links in lua (e.g. packer, lazy, ..)
-          github = true,               -- open github issues
-          package_json = true,         -- open dependencies from package.json
-          search = true,               -- search the web/selection on the web if nothing else is found
-          go = true,                   -- open pkg.go.dev from an import statement (uses treesitter)
-          jira = {                     -- custom handler to open Jira tickets (these have higher precedence than builtin handlers)
-            name = "jira",             -- set name of handler
+          plugin = true, -- open plugin links in lua (e.g. packer, lazy, ..)
+          github = true, -- open github issues
+          package_json = true, -- open dependencies from package.json
+          search = true, -- search the web/selection on the web if nothing else is found
+          go = true, -- open pkg.go.dev from an import statement (uses treesitter)
+          jira = { -- custom handler to open Jira tickets (these have higher precedence than builtin handlers)
+            name = "jira", -- set name of handler
             handle = function(mode, line, _)
               local ticket = require("gx.helper").find(line, mode, "(%u+-%d+)")
               if ticket and #ticket < 20 then
@@ -301,11 +269,11 @@ local plugins = {
           },
         },
         handler_options = {
-          search_engine = "google",               -- you can select between google, bing, duckduckgo, and ecosia
-          select_for_search = false,              -- if your cursor is e.g. on a link, the pattern for the link AND for the word will always match. This disables this behaviour for default so that the link is opened without the select option for the word AND link
+          search_engine = "google", -- you can select between google, bing, duckduckgo, and ecosia
+          select_for_search = false, -- if your cursor is e.g. on a link, the pattern for the link AND for the word will always match. This disables this behaviour for default so that the link is opened without the select option for the word AND link
 
           git_remotes = { "upstream", "origin" }, -- list of git remotes to search for git issue linking, in priority
-          git_remote_push = false,                -- use the push url for git issue linking,
+          git_remote_push = false, -- use the push url for git issue linking,
         },
       }
     end,
@@ -392,7 +360,7 @@ local plugins = {
     lazy = true,
     -- assign gcc hotkey to toggle chat
     keys = {
-      { "gh", ":OpenInGHFile <CR>",      mode = { "n" } },
+      { "gh", ":OpenInGHFile <CR>", mode = { "n" } },
       { "gh", ":OpenInGHFileLines <CR>", mode = { "v" } },
     },
   },
@@ -402,9 +370,9 @@ local plugins = {
     dependencies = { "MunifTanjim/nui.nvim" },
     opts = {
       disabled_keys = {
-        ["<Up>"] = false,    -- Allow <Up> key
+        ["<Up>"] = false, -- Allow <Up> key
         ["<Down>"] = false,
-        ["<Left>"] = false,  -- Allow <Left> key
+        ["<Left>"] = false, -- Allow <Left> key
         ["<Right>"] = false, -- Allow <Right> key
       },
     },
@@ -417,14 +385,14 @@ local plugins = {
     },
     config = true,
     keys = {
-      { "<leader>a",  nil,                              desc = "AI/Claude Code" },
-      { "<leader>ac", "<cmd>ClaudeCode<cr>",            desc = "Toggle Claude" },
-      { "<leader>af", "<cmd>ClaudeCodeFocus<cr>",       desc = "Focus Claude" },
-      { "<leader>ar", "<cmd>ClaudeCode --resume<cr>",   desc = "Resume Claude" },
+      { "<leader>a", nil, desc = "AI/Claude Code" },
+      { "<leader>ac", "<cmd>ClaudeCode<cr>", desc = "Toggle Claude" },
+      { "<leader>af", "<cmd>ClaudeCodeFocus<cr>", desc = "Focus Claude" },
+      { "<leader>ar", "<cmd>ClaudeCode --resume<cr>", desc = "Resume Claude" },
       { "<leader>aC", "<cmd>ClaudeCode --continue<cr>", desc = "Continue Claude" },
       { "<leader>am", "<cmd>ClaudeCodeSelectModel<cr>", desc = "Select Claude model" },
-      { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>",       desc = "Add current buffer" },
-      { "<leader>as", "<cmd>ClaudeCodeSend<cr>",        mode = "v",                  desc = "Send to Claude" },
+      { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer" },
+      { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },
       {
         "<leader>as",
         "<cmd>ClaudeCodeTreeAdd<cr>",
@@ -433,7 +401,7 @@ local plugins = {
       },
       -- Diff management
       { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
-      { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>",   desc = "Deny diff" },
+      { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
     },
   },
   {
@@ -443,6 +411,15 @@ local plugins = {
       require("notify").setup()
       vim.notify = require "notify"
     end,
+  },
+  {
+    "folke/todo-comments.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    opts = {
+      highlight = {
+        pattern = [[.*<(KEYWORDS)\s*]], -- pattern or table of patterns, used for highlighting (vim regex)
+      },
+    },
   },
 }
 

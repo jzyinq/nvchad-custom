@@ -54,6 +54,8 @@ local function get_link_text(url)
     link_text = "confluence"
   elseif url:match "atlassian%.net/browse/" then
     link_text = "jira"
+  elseif url:match "atlassian%.net/issues/" then
+    link_text = "jira"
   elseif url:match "miro%.com" then
     link_text = "miro"
   elseif url:match "slack%.com" then
