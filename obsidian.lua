@@ -53,6 +53,82 @@ M.search_incomplete_tasks = function()
       :find()
 end
 
+M.search_recent_notes = function()
+  local pickers = require "telescope.pickers"
+  local finders = require "telescope.finders"
+  local previewers = require "telescope.previewers"
+  local conf = require("telescope.config").values
+  local action_state = require "telescope.actions.state"
+  local actions = require "telescope.actions"
+
+  -- Calculate date 2 weeks ago (14 days)
+  local two_weeks_ago = os.time() - (14 * 24 * 60 * 60)
+
+  -- Find all markdown files in the daily folder
+  local daily_path = "/home/jzy/homecloud/backups/obsidian/piwik/daily"
+  local find_command = "find '" .. daily_path .. "' -type f -name '*.md'"
+
+  -- Get all markdown files
+  local handle = io.popen(find_command)
+  local result = handle:read("*a")
+  handle:close()
+
+  local files = {}
+  for file in result:gmatch("[^\r\n]+") do
+    -- Get file modification time
+    local stat = vim.loop.fs_stat(file)
+    if stat and stat.mtime.sec >= two_weeks_ago then
+      table.insert(files, {
+        path = file,
+        mtime = stat.mtime.sec,
+      })
+    end
+  end
+
+  -- Sort files by modification time (newest first)
+  table.sort(files, function(a, b)
+    return a.mtime > b.mtime
+  end)
+
+  -- Create entries for telescope
+  local entries = {}
+  for _, file in ipairs(files) do
+    local filename = file.path:match("^.+/(.+)$")
+    local display_name = filename:gsub("%.md$", "")
+    local date_str = os.date("%Y-%m-%d %H:%M", file.mtime)
+
+    table.insert(entries, {
+      value = file.path,
+      display = string.format("%s  [modified: %s]", display_name, date_str),
+      ordinal = display_name,
+      filename = file.path,
+      mtime = file.mtime,
+    })
+  end
+
+  pickers
+      .new({}, {
+        prompt_title = "Daily Notes (Last 2 Weeks)",
+        finder = finders.new_table {
+          results = entries,
+          entry_maker = function(entry)
+            return entry
+          end,
+        },
+        sorter = conf.generic_sorter {},
+        previewer = previewers.vim_buffer_cat.new {},
+        attach_mappings = function(prompt_bufnr, map)
+          actions.select_default:replace(function()
+            actions.close(prompt_bufnr)
+            local selection = action_state.get_selected_entry()
+            vim.cmd("edit " .. selection.filename)
+          end)
+          return true
+        end,
+      })
+      :find()
+end
+
 M._add_checkbox = function(character, line_num)
 	local line = vim.api.nvim_buf_get_lines(0, line_num - 1, line_num, false)[1]
 

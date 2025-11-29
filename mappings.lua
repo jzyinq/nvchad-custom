@@ -40,6 +40,12 @@ M.telescope_project = {
       end,
       "Tasks filter",
     },
+    ["<leader>os"] = {
+      function()
+        require("custom.obsidian").search_recent_notes()
+      end,
+      "Recent notes (2 weeks)",
+    },
     ["<leader>th"] = {
       ":lua require('telescope.builtin').command_history()<CR>",
       "Command History",
