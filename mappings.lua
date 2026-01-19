@@ -40,6 +40,12 @@ M.telescope_project = {
       end,
       "Tasks filter",
     },
+    ["<leader>to"] = {
+      function()
+        require("custom.obsidian").search_overdue_tasks()
+      end,
+      "Tasks overdue",
+    },
     ["<leader>os"] = {
       function()
         require("custom.obsidian").search_recent_notes()

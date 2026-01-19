@@ -1,56 +1,82 @@
 --type KeybindsTable = { [string] = {string | function, string, table?} }
 local M = {}
 
-M.search_incomplete_tasks = function()
+local TASK_SEARCH_PATHS = {
+  "/home/jzy/homecloud/backups/obsidian/piwik/daily",
+  "/home/jzy/homecloud/backups/obsidian/piwik/projects",
+}
+
+M.search_tasks = function(opts)
+  opts = opts or {}
+  local title = opts.title or "Tasks"
+  local filter_fn = opts.filter_fn
+
   local pickers = require "telescope.pickers"
   local finders = require "telescope.finders"
   local previewers = require "telescope.previewers"
   local conf = require("telescope.config").values
-  local search_command =
-  { "rg", "--vimgrep", [[^\s*- \[ \] .*📅 \d{4}-\d{2}-\d{2}]], "/home/jzy/homecloud/backups/obsidian/piwik" }
 
-  pickers
-      .new({}, {
-        prompt_title = "Incomplete Tasks",
-        finder = finders.new_oneshot_job(search_command, {
-          entry_maker = function(entry)
-            -- Extract file, line number, column, and text from `rg` output
-            local filename, lnum, col, text = entry:match "([^:]+):(%d+):(%d+):(.*)"
+  local today = os.date("%Y-%m-%d")
+  local search_command = vim.list_extend(
+    { "rg", "--vimgrep", [[^\s*- \[ \] .*📅 \d{4}-\d{2}-\d{2}]] },
+    TASK_SEARCH_PATHS
+  )
 
-            -- Remove "- [ ]" from the beginning of the task text
-            local clean_text = text:gsub("^%- %[ %] ", "")
+  local entry_maker = function(entry)
+    local filename, lnum, col, text = entry:match "([^:]+):(%d+):(%d+):(.*)"
+    if not filename then return nil end
 
-            -- Extract date with emoji (📅 YYYY-MM-DD) from the end of the task text
-            local date_with_emoji = clean_text:match "📅 %d%d%d%d%-%d%d%-%d%d$" or ""
-            clean_text = clean_text:gsub("📅 %d%d%d%d%-%d%d%-%d%d$", "") -- Remove date from end
+    local clean_text = text:gsub("^%- %[ %] ", "")
+    local task_date = clean_text:match "📅 (%d%d%d%d%-%d%d%-%d%d)$"
 
-            -- Format the display with the date (with emoji) at the beginning
-            local display_text = string.format("%s - %s", date_with_emoji, clean_text)
+    if filter_fn and not filter_fn(task_date, today) then
+      return nil
+    end
 
-            return {
-              value = entry,
-              display = display_text,                -- Display date first, then task text
-              ordinal = date_with_emoji .. clean_text, -- Use date + task text for sorting
-              filename = filename,                   -- File path for previewer
-              lnum = tonumber(lnum),                 -- Line number for previewer
-              col = tonumber(col),                   -- Column (optional)
-              text = clean_text,                     -- Clean task text
-              date = date_with_emoji,                -- Date with emoji for sorting
-            }
-          end,
-        }),
-        sorter = conf.generic_sorter {},
-        previewer = previewers.vim_buffer_cat.new {
-          define_preview = function(self, entry, status)
-            -- Open the file and jump to the specific line for preview
-            conf.buffer_previewer_maker(entry.filename, self.state.bufnr, {
-              bufname = self.state.bufname,
-              lnum = entry.lnum,
-            })
-          end,
-        },
-      })
-      :find()
+    local date_with_emoji = clean_text:match "📅 %d%d%d%d%-%d%d%-%d%d$" or ""
+    clean_text = clean_text:gsub("📅 %d%d%d%d%-%d%d%-%d%d$", "")
+
+    return {
+      value = entry,
+      display = string.format("%s - %s", date_with_emoji, clean_text),
+      ordinal = date_with_emoji .. clean_text,
+      filename = filename,
+      lnum = tonumber(lnum),
+      col = tonumber(col),
+      text = clean_text,
+      date = date_with_emoji,
+    }
+  end
+
+  pickers.new({}, {
+    prompt_title = title,
+    finder = finders.new_async_job({
+      command_generator = function() return search_command end,
+      entry_maker = entry_maker,
+    }),
+    sorter = conf.generic_sorter {},
+    previewer = previewers.vim_buffer_cat.new {
+      define_preview = function(self, entry)
+        conf.buffer_previewer_maker(entry.filename, self.state.bufnr, {
+          bufname = self.state.bufname,
+          lnum = entry.lnum,
+        })
+      end,
+    },
+  }):find()
+end
+
+M.search_incomplete_tasks = function()
+  M.search_tasks({ title = "Incomplete Tasks" })
+end
+
+M.search_overdue_tasks = function()
+  M.search_tasks({
+    title = "Overdue Tasks",
+    filter_fn = function(task_date, today)
+      return task_date and task_date <= today
+    end,
+  })
 end
 
 M.search_recent_notes = function()
