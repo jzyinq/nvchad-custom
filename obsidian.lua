@@ -6,77 +6,86 @@ local TASK_SEARCH_PATHS = {
   "/home/jzy/homecloud/backups/obsidian/piwik/projects",
 }
 
-M.search_tasks = function(opts)
-  opts = opts or {}
-  local title = opts.title or "Tasks"
-  local filter_fn = opts.filter_fn
-
+M.search_incomplete_tasks = function()
   local pickers = require "telescope.pickers"
   local finders = require "telescope.finders"
   local previewers = require "telescope.previewers"
   local conf = require("telescope.config").values
 
-  local today = os.date("%Y-%m-%d")
-  local search_command = vim.list_extend(
-    { "rg", "--vimgrep", [[^\s*- \[ \] .*📅 \d{4}-\d{2}-\d{2}]] },
-    TASK_SEARCH_PATHS
-  )
+  M.get_tasks_with_dates(function(tasks)
+    vim.schedule(function()
+      pickers.new({}, {
+        prompt_title = "Incomplete Tasks",
+        finder = finders.new_table({
+          results = tasks,
+          entry_maker = function(task)
+            local clean_text = task.text:gsub("^%- %[ %] ", "")
+            local date_with_emoji = "📅 " .. task.date
+            clean_text = clean_text:gsub("📅 %d%d%d%d%-%d%d%-%d%d$", "")
 
-  local entry_maker = function(entry)
-    local filename, lnum, col, text = entry:match "([^:]+):(%d+):(%d+):(.*)"
-    if not filename then return nil end
-
-    local clean_text = text:gsub("^%- %[ %] ", "")
-    local task_date = clean_text:match "📅 (%d%d%d%d%-%d%d%-%d%d)$"
-
-    if filter_fn and not filter_fn(task_date, today) then
-      return nil
-    end
-
-    local date_with_emoji = clean_text:match "📅 %d%d%d%d%-%d%d%-%d%d$" or ""
-    clean_text = clean_text:gsub("📅 %d%d%d%d%-%d%d%-%d%d$", "")
-
-    return {
-      value = entry,
-      display = string.format("%s - %s", date_with_emoji, clean_text),
-      ordinal = date_with_emoji .. clean_text,
-      filename = filename,
-      lnum = tonumber(lnum),
-      col = tonumber(col),
-      text = clean_text,
-      date = date_with_emoji,
-    }
-  end
-
-  pickers.new({}, {
-    prompt_title = title,
-    finder = finders.new_async_job({
-      command_generator = function() return search_command end,
-      entry_maker = entry_maker,
-    }),
-    sorter = conf.generic_sorter {},
-    previewer = previewers.vim_buffer_cat.new {
-      define_preview = function(self, entry)
-        conf.buffer_previewer_maker(entry.filename, self.state.bufnr, {
-          bufname = self.state.bufname,
-          lnum = entry.lnum,
-        })
-      end,
-    },
-  }):find()
-end
-
-M.search_incomplete_tasks = function()
-  M.search_tasks({ title = "Incomplete Tasks" })
+            return {
+              value = task,
+              display = string.format("%s - %s", date_with_emoji, clean_text),
+              ordinal = task.date .. clean_text,
+              filename = task.filename,
+              lnum = task.lnum,
+              col = task.col,
+            }
+          end,
+        }),
+        sorter = conf.generic_sorter {},
+        previewer = previewers.vim_buffer_cat.new {
+          define_preview = function(self, entry)
+            conf.buffer_previewer_maker(entry.filename, self.state.bufnr, {
+              bufname = self.state.bufname,
+              lnum = entry.lnum,
+            })
+          end,
+        },
+      }):find()
+    end)
+  end)
 end
 
 M.search_overdue_tasks = function()
-  M.search_tasks({
-    title = "Overdue Tasks",
-    filter_fn = function(task_date, today)
-      return task_date and task_date <= today
-    end,
-  })
+  local pickers = require "telescope.pickers"
+  local finders = require "telescope.finders"
+  local previewers = require "telescope.previewers"
+  local conf = require("telescope.config").values
+
+  M.get_overdue_tasks(function(tasks)
+    vim.schedule(function()
+      pickers.new({}, {
+        prompt_title = "Overdue Tasks",
+        finder = finders.new_table({
+          results = tasks,
+          entry_maker = function(task)
+            local clean_text = task.text:gsub("^%- %[ %] ", "")
+            local date_with_emoji = "📅 " .. task.date
+            clean_text = clean_text:gsub("📅 %d%d%d%d%-%d%d%-%d%d$", "")
+
+            return {
+              value = task,
+              display = string.format("%s - %s", date_with_emoji, clean_text),
+              ordinal = task.date .. clean_text,
+              filename = task.filename,
+              lnum = task.lnum,
+              col = task.col,
+            }
+          end,
+        }),
+        sorter = conf.generic_sorter {},
+        previewer = previewers.vim_buffer_cat.new {
+          define_preview = function(self, entry)
+            conf.buffer_previewer_maker(entry.filename, self.state.bufnr, {
+              bufname = self.state.bufname,
+              lnum = entry.lnum,
+            })
+          end,
+        },
+      }):find()
+    end)
+  end)
 end
 
 M.search_recent_notes = function()
@@ -220,5 +229,148 @@ M.toggle_checkbox = function(character)
     toggle_or_remove(character, line_num)
   end
 end
+
+-- Overdue tasks indicator
+local overdue_ns = vim.api.nvim_create_namespace("obsidian_overdue_indicator")
+local overdue_indicator_initialized = false
+
+M.is_today_note = function(filepath)
+  local today = os.date("%Y-%m-%d")
+  local filename = filepath:match("([^/]+)%.md$")
+  return filename == today
+end
+
+M.get_tasks_with_dates = function(callback, filter_fn)
+  local today = os.date("%Y-%m-%d")
+  local cmd = vim.list_extend(
+    { "rg", "--vimgrep", [[^\s*- \[ \] .*📅 \d{4}-\d{2}-\d{2}]] },
+    TASK_SEARCH_PATHS
+  )
+
+  local tasks = {}
+  vim.fn.jobstart(cmd, {
+    stdout_buffered = true,
+    on_stdout = function(_, data)
+      for _, line in ipairs(data) do
+        if line ~= "" then
+          local filename, lnum, col, text = line:match("([^:]+):(%d+):(%d+):(.*)")
+          if filename then
+            local task_date = text:match("📅 (%d%d%d%d%-%d%d%-%d%d)")
+            if task_date then
+              local include = true
+              if filter_fn then
+                include = filter_fn(task_date, today)
+              end
+              if include then
+                table.insert(tasks, {
+                  filename = filename,
+                  lnum = tonumber(lnum),
+                  col = tonumber(col),
+                  text = text,
+                  date = task_date,
+                })
+              end
+            end
+          end
+        end
+      end
+    end,
+    on_exit = function()
+      -- Sort by date chronologically
+      table.sort(tasks, function(a, b)
+        return a.date < b.date
+      end)
+      callback(tasks)
+    end,
+  })
+end
+
+M.get_overdue_tasks = function(callback)
+  M.get_tasks_with_dates(callback, function(task_date, today)
+    return task_date <= today
+  end)
+end
+
+M.count_overdue_tasks = function(callback)
+  M.get_overdue_tasks(function(tasks)
+    callback(#tasks)
+  end)
+end
+
+M.show_overdue_indicator = function()
+  local buf = vim.api.nvim_get_current_buf()
+  local filepath = vim.api.nvim_buf_get_name(buf)
+
+  -- Clear existing extmarks
+  vim.api.nvim_buf_clear_namespace(buf, overdue_ns, 0, -1)
+
+  -- Only show for today's note
+  if not M.is_today_note(filepath) then
+    return
+  end
+
+  M.get_overdue_tasks(function(tasks)
+    vim.schedule(function()
+      -- Check if buffer is still valid
+      if not vim.api.nvim_buf_is_valid(buf) then
+        return
+      end
+
+      if #tasks == 0 then
+        return
+      end
+
+      -- Find closing --- of YAML frontmatter
+      local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+      local frontmatter_end = 0
+      local found_start = false
+      for i, line in ipairs(lines) do
+        if line:match("^%-%-%-$") then
+          if found_start then
+            frontmatter_end = i - 1  -- 0-indexed
+            break
+          else
+            found_start = true
+          end
+        end
+      end
+
+      -- Build virtual lines with task list
+      local virt_lines = {
+        { { string.format("⚠ %d overdue task%s:", #tasks, #tasks > 1 and "s" or ""), "WarningMsg" } },
+      }
+
+      for _, task in ipairs(tasks) do
+        local clean_text = task.text:gsub("^%- %[ %] ", "")
+        clean_text = clean_text:gsub("📅 %d%d%d%d%-%d%d%-%d%d$", "")
+        local display = string.format("  • [%s] %s", task.date, clean_text)
+        table.insert(virt_lines, { { display, "Comment" } })
+      end
+
+      table.insert(virt_lines, { { string.format("<leader>to Overdue / <leader>tf All"), "Comment" }} )
+
+      vim.api.nvim_buf_set_extmark(buf, overdue_ns, frontmatter_end, 0, {
+        virt_lines = virt_lines,
+      })
+    end)
+  end)
+end
+
+M.setup_overdue_indicator = function()
+  if overdue_indicator_initialized then
+    return
+  end
+  overdue_indicator_initialized = true
+
+  vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePost" }, {
+    pattern = "*.md",
+    callback = function()
+      M.show_overdue_indicator()
+    end,
+  })
+end
+
+-- Auto-setup when module is loaded
+M.setup_overdue_indicator()
 
 return M

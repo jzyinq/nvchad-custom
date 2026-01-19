@@ -4,6 +4,9 @@ local M = {}
 -- Path to overriding theme and highlights files
 local highlights = require "custom.highlights"
 
+-- Load obsidian module (registers autocommands for overdue tasks indicator)
+require "custom.obsidian"
+
 M.ui = {
   theme = "onedark",
   theme_toggle = { "bearded-arc", "one_light" },
