@@ -64,6 +64,14 @@ M.telescope_project = {
       ":Telescope keymaps<CR>",
       "Key bindings",
     },
+    ["<leader>fs"] = {
+      "<cmd>Telescope lsp_document_symbols<CR>",
+      "Document symbols",
+    },
+    ["<leader>fS"] = {
+      "<cmd>Telescope lsp_workspace_symbols<CR>",
+      "Workspace symbols",
+    },
   },
 }
 

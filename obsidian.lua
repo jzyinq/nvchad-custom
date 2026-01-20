@@ -235,9 +235,10 @@ local overdue_ns = vim.api.nvim_create_namespace("obsidian_overdue_indicator")
 local overdue_indicator_initialized = false
 
 M.is_today_note = function(filepath)
+  local vault_path = "/home/jzy/homecloud/backups/obsidian/piwik"
   local today = os.date("%Y-%m-%d")
   local filename = filepath:match("([^/]+)%.md$")
-  return filename == today
+  return filename == today and filepath:sub(1, #vault_path) == vault_path
 end
 
 M.get_tasks_with_dates = function(callback, filter_fn)
