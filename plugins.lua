@@ -381,7 +381,7 @@ local plugins = {
     "coder/claudecode.nvim",
     dependencies = { "folke/snacks.nvim" },
     opts = {
-      terminal_cmd = "~/.claude/local/claude", -- Point to local installation
+      terminal_cmd = "~/.local/bin/claude", -- Point to local installation
     },
     config = true,
     keys = {

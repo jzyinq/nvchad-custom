@@ -6,6 +6,12 @@ local function get_tomorrow_date()
   return os.date("%Y-%m-%d", tomorrow)
 end
 
+-- get yesterday date in a format of YYYY-MM-DD
+local function get_yesterday_date()
+  local yesterday = os.time() - 86400
+  return os.date("%Y-%m-%d", yesterday)
+end
+
 -- function to get the next occurrence date for a given day abbreviation
 local function get_next_day_date(day_abbr)
   local days = {
@@ -71,6 +77,11 @@ ls.add_snippets("all", {
   snippet("tomorrow", {
     ls.function_node(function()
       return get_tomorrow_date()
+    end),
+  }),
+  snippet("yesterday", {
+    ls.function_node(function()
+      return get_yesterday_date()
     end),
   }),
 })
