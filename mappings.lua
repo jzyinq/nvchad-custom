@@ -52,6 +52,12 @@ M.telescope_project = {
       end,
       "Recent notes (2 weeks)",
     },
+    ["<leader>ow"] = {
+      function()
+        require("custom.obsidian").search_recent_files_grep()
+      end,
+      "Obsidian grep (60 days)",
+    },
     ["<leader>th"] = {
       ":lua require('telescope.builtin').command_history()<CR>",
       "Command History",

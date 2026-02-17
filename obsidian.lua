@@ -164,6 +164,44 @@ M.search_recent_notes = function()
       :find()
 end
 
+M.search_recent_files_grep = function()
+  local vault_path = "/home/jzy/homecloud/backups/obsidian/piwik"
+  local sixty_days_ago = os.time() - (60 * 24 * 60 * 60)
+  local cutoff_date = os.date("%Y-%m-%d", sixty_days_ago)
+
+  local handle = io.popen("find '" .. vault_path .. "' -type f -name '*.md'")
+  local result = handle:read("*a")
+  handle:close()
+
+  local recent_files = {}
+  for file in result:gmatch("[^\r\n]+") do
+    local filename = file:match("([^/]+)%.md$")
+    local is_daily = file:find("/daily/") ~= nil
+    if is_daily then
+      -- Filter daily notes by filename date
+      if filename and filename:match("^%d%d%d%d%-%d%d%-%d%d$") and filename >= cutoff_date then
+        table.insert(recent_files, file)
+      end
+    else
+      -- Filter non-daily files by mtime
+      local stat = vim.loop.fs_stat(file)
+      if stat and stat.mtime.sec >= sixty_days_ago then
+        table.insert(recent_files, file)
+      end
+    end
+  end
+
+  if #recent_files == 0 then
+    vim.notify("No recently modified Obsidian files found", vim.log.levels.WARN)
+    return
+  end
+
+  require("telescope.builtin").live_grep({
+    prompt_title = "Grep Obsidian (Last 60 Days)",
+    search_dirs = recent_files,
+  })
+end
+
 M._add_checkbox = function(character, line_num)
 	local line = vim.api.nvim_buf_get_lines(0, line_num - 1, line_num, false)[1]
 
