@@ -19,7 +19,7 @@ M.search_incomplete_tasks = function()
         finder = finders.new_table({
           results = tasks,
           entry_maker = function(task)
-            local clean_text = task.text:gsub("^%- %[ %] ", "")
+            local clean_text = task.text:gsub("^%- %[.%] ", "")
             local date_with_emoji = "📅 " .. task.date
             clean_text = clean_text:gsub("📅 %d%d%d%d%-%d%d%-%d%d$", "")
 
@@ -60,7 +60,7 @@ M.search_overdue_tasks = function()
         finder = finders.new_table({
           results = tasks,
           entry_maker = function(task)
-            local clean_text = task.text:gsub("^%- %[ %] ", "")
+            local clean_text = task.text:gsub("^%- %[.%] ", "")
             local date_with_emoji = "📅 " .. task.date
             clean_text = clean_text:gsub("📅 %d%d%d%d%-%d%d%-%d%d$", "")
 
@@ -282,7 +282,7 @@ end
 M.get_tasks_with_dates = function(callback, filter_fn)
   local today = os.date("%Y-%m-%d")
   local cmd = vim.list_extend(
-    { "rg", "--vimgrep", [[^\s*- \[ \] .*📅 \d{4}-\d{2}-\d{2}]] },
+    { "rg", "--vimgrep", [[^\s*- \[[^x-]\] .*📅 \d{4}-\d{2}-\d{2}]] },
     TASK_SEARCH_PATHS
   )
 
@@ -380,7 +380,7 @@ M.show_overdue_indicator = function()
       }
 
       for _, task in ipairs(tasks) do
-        local clean_text = task.text:gsub("^%- %[ %] ", "")
+        local clean_text = task.text:gsub("^%- %[.%] ", "")
         clean_text = clean_text:gsub("📅 %d%d%d%d%-%d%d%-%d%d$", "")
         local display = string.format("  • [%s] %s", task.date, clean_text)
         table.insert(virt_lines, { { display, "Comment" } })
