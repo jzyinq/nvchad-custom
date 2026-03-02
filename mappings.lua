@@ -214,13 +214,13 @@ M.obsidian = {
 
 M.link_utils = {
   n = {
-    ["<leader>lp"] = {
+    ["<leader>p"] = {
       function()
         require("custom.link_utils").smart_link_paste()
       end,
       "Smart link paste (after cursor)",
     },
-    ["<leader>lP"] = {
+    ["<leader>P"] = {
       function()
         require("custom.link_utils").smart_link_paste_before()
       end,
