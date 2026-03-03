@@ -182,11 +182,23 @@ local plugins = {
     end,
     dependencies = { { "nvim-tree/nvim-web-devicons" } },
   },
-  -- To make a plugin not be loaded
-  -- {
-  --   "NvChad/nvim-colorizer.lua",
-  --   enabled = false
-  -- },
+  -- Override colorizer to use new structured options format
+  {
+    "NvChad/nvim-colorizer.lua",
+    opts = {
+      options = {
+        parsers = {
+          names = { enable = true },
+          hex = { default = true },
+          rgb = { enable = false },
+          hsl = { enable = false },
+        },
+        display = {
+          mode = "background",
+        },
+      },
+    },
+  },
 
   -- All NvChad plugins are lazy-loaded by default
   -- For a plugin to be loaded, you will need to set either `ft`, `cmd`, `keys`, `event`, or set `lazy = false`
