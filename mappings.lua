@@ -226,7 +226,7 @@ M.link_utils = {
       end,
       "Smart link paste (before cursor)",
     },
-    ["<leader>pb"] = {
+    ["<leader>p`"] = {
       function()
         require("custom.link_utils").paste_as_codeblock()
       end,
