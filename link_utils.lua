@@ -143,4 +143,27 @@ M.smart_link_paste_before = function()
   vim.api.nvim_win_set_cursor(0, { cursor_pos[1], col + #markdown_link })
 end
 
+M.paste_as_codeblock = function()
+  local clipboard = vim.fn.getreg "+"
+  if not clipboard or clipboard == "" then
+    vim.notify("Clipboard is empty", vim.log.levels.WARN)
+    return
+  end
+  -- Remove trailing newline if present
+  clipboard = clipboard:gsub("\n$", "")
+  local lines = { "```" }
+  for line in (clipboard .. "\n"):gmatch "(.-)\n" do
+    table.insert(lines, line)
+  end
+  table.insert(lines, "```")
+  vim.api.nvim_put(lines, "l", true, true)
+end
+
+M.wrap_codeblock = function()
+  local start_line = vim.fn.line "'<"
+  local end_line = vim.fn.line "'>"
+  vim.api.nvim_buf_set_lines(0, end_line, end_line, false, { "```" })
+  vim.api.nvim_buf_set_lines(0, start_line - 1, start_line - 1, false, { "```" })
+end
+
 return M

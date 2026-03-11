@@ -324,6 +324,18 @@ local plugins = {
     config = function()
       require("nvim-surround").setup {
         surrounds = {
+          ["`"] = {
+            add = function()
+              local mode = vim.fn.visualmode()
+              if mode == "V" then
+                return { { "```" }, { "```" } }
+              else
+                return { { "`" }, { "`" } }
+              end
+            end,
+            find = "```.-```",
+            delete = "^(```)().-(```)()$",
+          },
           ["l"] = {
             add = function()
               local clipboard = vim.fn.getreg("+"):gsub("\n", "")
