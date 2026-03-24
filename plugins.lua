@@ -433,6 +433,9 @@ local plugins = {
     dependencies = { "folke/snacks.nvim" },
     opts = {
       terminal_cmd = "~/.local/bin/claude", -- Point to local installation
+      terminal = {
+        split_width_percentage = 0.5,
+      },
     },
     config = true,
     keys = {

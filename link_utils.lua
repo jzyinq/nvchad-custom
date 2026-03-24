@@ -51,7 +51,12 @@ local function get_link_text(url)
   elseif url:match "github%.com" then
     link_text = "github"
   elseif url:match "atlassian%.net/wiki/" then
-    link_text = "confluence"
+    if url:match "/pages/" then
+      local last_segment = url:gsub("#.*$", ""):match("/([^/]+)$")
+      link_text = last_segment and last_segment:gsub("+", " ") or "confluence"
+    else
+      link_text = "confluence"
+    end
   elseif url:match "atlassian%.net/browse/" then
     local ticket = url:match "atlassian%.net/browse/([^/?#]+)"
     link_text = ticket or "jira"
