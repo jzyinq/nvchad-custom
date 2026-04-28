@@ -50,7 +50,7 @@ M.telescope_project = {
       function()
         require("custom.obsidian").search_recent_notes()
       end,
-      "Recent notes (2 weeks)",
+      "Obsidian recent notes (2 weeks)",
     },
     ["<leader>ow"] = {
       function()
