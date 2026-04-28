@@ -292,12 +292,33 @@ local plugins = {
       local gx_helper = require "gx.helper"
       local link_utils = require "custom.link_utils"
 
+      local function is_explicit_local_path(token)
+        return token
+          and (token:match "^~/" or token:match "^%./" or token:match "^%.%./" or token:match "^/")
+      end
+
       require("gx").setup {
         open_browser_app = "xdg-open", -- specify your browser app; default for macOS is "open", Linux "xdg-open" and Windows "powershell.exe"
         handlers = {
           plugin = true, -- open plugin links in lua (e.g. packer, lazy, ..)
           github = true, -- open github issues
           package_json = true, -- open dependencies from package.json
+          url = {
+            name = "url",
+            handle = function(mode, line, _)
+              local url = gx_helper.find(line, mode, "(https?://[a-zA-Z%d_/%%%-%.~@\\+#=?&:*]+)")
+              if url then
+                return url:gsub("\\([%%p])", "%1")
+              end
+
+              local raw = gx_helper.find(line, mode, "([a-zA-Z%d_/%-%.~@\\+#]+%.[a-zA-Z_/%%%-%.~@\\+#=?&:]+)")
+              if not raw or is_explicit_local_path(raw) then
+                return nil
+              end
+
+              return ("https://" .. raw):gsub("\\([%%p])", "%1")
+            end,
+          },
           go = true, -- open pkg.go.dev from an import statement (uses treesitter)
           jira = { -- custom handler to open Jira tickets (these have higher precedence than builtin handlers)
             name = "jira", -- set name of handler
