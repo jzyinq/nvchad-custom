@@ -289,13 +289,15 @@ local plugins = {
 
     -- you can specify also another config if you want
     config = function()
+      local gx_helper = require "gx.helper"
+      local link_utils = require "custom.link_utils"
+
       require("gx").setup {
         open_browser_app = "xdg-open", -- specify your browser app; default for macOS is "open", Linux "xdg-open" and Windows "powershell.exe"
         handlers = {
           plugin = true, -- open plugin links in lua (e.g. packer, lazy, ..)
           github = true, -- open github issues
           package_json = true, -- open dependencies from package.json
-          search = true, -- search the web/selection on the web if nothing else is found
           go = true, -- open pkg.go.dev from an import statement (uses treesitter)
           jira = { -- custom handler to open Jira tickets (these have higher precedence than builtin handlers)
             name = "jira", -- set name of handler
@@ -306,6 +308,28 @@ local plugins = {
               end
             end,
           },
+          local_path = {
+            name = "local_path",
+            handle = function(mode, line, _)
+              local path
+              if mode == "n" then
+                local col = vim.api.nvim_win_get_cursor(0)[2] + 1
+                path = link_utils._extract_local_path_token_at_col(line, col)
+              else
+                local token = gx_helper.find(line, mode, "([^%s]+)")
+                if token then
+                  path = link_utils._extract_local_path_token(token)
+                end
+              end
+
+              if not path then
+                return nil
+              end
+
+              return link_utils._local_path_to_uri(path)
+            end,
+          },
+          search = true, -- search the web/selection on the web if nothing else is found
         },
         handler_options = {
           search_engine = "google", -- you can select between google, bing, duckduckgo, and ecosia

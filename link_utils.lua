@@ -1,5 +1,134 @@
 local M = {}
 
+local local_path_prefixes = { "~/", "../", "./", "/" }
+
+local function trim_local_path_punctuation(path)
+  return path:gsub("[`',.:%]%)]*$", "")
+end
+
+local function match_local_path_token(text, index)
+  return text:match("[^%s%]%)]+", index)
+end
+
+local function has_local_path_prefix(path)
+  for _, prefix in ipairs(local_path_prefixes) do
+    if path:sub(1, #prefix) == prefix then
+      return true
+    end
+  end
+
+  return false
+end
+
+local function is_local_path_boundary(text, index)
+  if index == 1 then
+    return true
+  end
+
+  return text:sub(index - 1, index - 1):match "[%s%[(`]" ~= nil
+end
+
+function M._extract_local_path_token(text)
+  if type(text) ~= "string" then
+    return nil
+  end
+
+  local earliest_index
+  local earliest_token
+
+  for _, prefix in ipairs(local_path_prefixes) do
+    local search_start = 1
+
+    while true do
+      local index = text:find(prefix, search_start, true)
+      if not index then
+        break
+      end
+
+      if is_local_path_boundary(text, index) then
+        local token = match_local_path_token(text, index)
+        if token then
+          token = trim_local_path_punctuation(token)
+          if not earliest_index or index < earliest_index then
+            earliest_index = index
+            earliest_token = token
+          end
+        end
+      end
+
+      search_start = index + 1
+    end
+  end
+
+  return earliest_token
+end
+
+function M._extract_local_path_token_at_col(text, col)
+  if type(text) ~= "string" or type(col) ~= "number" then
+    return nil
+  end
+
+  for _, prefix in ipairs(local_path_prefixes) do
+    local search_start = 1
+
+    while true do
+      local index = text:find(prefix, search_start, true)
+      if not index then
+        break
+      end
+
+      if is_local_path_boundary(text, index) then
+        local token = match_local_path_token(text, index)
+        if token then
+          token = trim_local_path_punctuation(token)
+          local last_index = index + #token - 1
+          if col >= index and col <= last_index then
+            return token
+          end
+        end
+      end
+
+      search_start = index + 1
+    end
+  end
+
+  return nil
+end
+
+function M._resolve_local_path(path)
+  if type(path) ~= "string" then
+    return nil
+  end
+
+  path = trim_local_path_punctuation(path)
+  if not has_local_path_prefix(path) then
+    return nil
+  end
+
+  local expanded_path = path:sub(1, 2) == "~/" and vim.fn.expand(path) or path
+  local absolute_path = vim.fn.fnamemodify(expanded_path, ":p")
+
+  if vim.loop.fs_stat(absolute_path) then
+    return absolute_path
+  end
+
+  return nil
+end
+
+function M._local_path_to_uri(path)
+  local absolute_path = M._resolve_local_path(path)
+  if not absolute_path then
+    return nil
+  end
+
+  return vim.uri_from_fname(absolute_path)
+end
+
+local function get_url_host(url)
+  local host = url:match "https?://([^/%?#]+)"
+  return host and host:gsub("^www%.", "") or nil
+end
+
 -- Helper function to get and validate clipboard URL
 local function get_clipboard_url()
   -- Get clipboard content
@@ -51,9 +180,15 @@ local function get_link_text(url)
   elseif url:match "github%.com" then
     link_text = "github"
   elseif url:match "atlassian%.net/wiki/" then
+    local clean_url = url:gsub("[?#].*$", "")
     if url:match "/pages/" then
-      local last_segment = url:gsub("#.*$", ""):match("/([^/]+)$")
-      link_text = last_segment and last_segment:gsub("+", " ") or "confluence"
+      local is_edit_url = clean_url:match "/pages/edit"
+      local last_segment = clean_url:match "/([^/]+)$"
+      if is_edit_url or (last_segment and last_segment:match "^%d+$") then
+        link_text = get_url_host(url) or "confluence"
+      else
+        link_text = last_segment and last_segment:gsub("%+", " ") or "confluence"
+      end
     else
       link_text = "confluence"
     end
@@ -69,10 +204,8 @@ local function get_link_text(url)
     link_text = "slack"
   else
     -- Extract domain name without TLD extension for default case
-    local domain = url:match "https?://([^/]+)"
+    local domain = get_url_host(url)
     if domain then
-      -- Remove www. prefix if present
-      domain = domain:gsub("^www%.", "")
       -- Extract the main domain name (before the TLD)
       local domain_name = domain:match "([^%.]+)"
       if domain_name then
