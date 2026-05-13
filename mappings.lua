@@ -238,12 +238,14 @@ M.link_utils = {
         if vim.g.writer_mode then
           vim.g.writer_mode = false
           vim.opt.textwidth = 0
-cmp.setup { enabled = true }
+          cmp.setup { enabled = true }
+          vim.cmd.redrawstatus()
           vim.notify("Writer Mode disabled", vim.log.levels.INFO, { title = "Writer Mode" })
         else
           vim.g.writer_mode = true
           vim.opt.textwidth = 80
-cmp.setup { enabled = false }
+          cmp.setup { enabled = false }
+          vim.cmd.redrawstatus()
           vim.notify("Writer Mode enabled", vim.log.levels.INFO, { title = "Writer Mode" })
         end
       end,
