@@ -232,6 +232,23 @@ M.link_utils = {
       end,
       "Paste clipboard as code block",
     },
+    ["<leader>W"] = {
+      function()
+        local cmp = require "cmp"
+        if vim.g.writer_mode then
+          vim.g.writer_mode = false
+          vim.opt.textwidth = 0
+cmp.setup { enabled = true }
+          vim.notify("Writer Mode disabled", vim.log.levels.INFO, { title = "Writer Mode" })
+        else
+          vim.g.writer_mode = true
+          vim.opt.textwidth = 80
+cmp.setup { enabled = false }
+          vim.notify("Writer Mode enabled", vim.log.levels.INFO, { title = "Writer Mode" })
+        end
+      end,
+      "Toggle Writer Mode (80 chars, no completion)",
+    },
   },
 }
 
