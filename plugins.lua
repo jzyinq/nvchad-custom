@@ -3,6 +3,26 @@ local overrides = require "custom.configs.overrides"
 ---@type NvPluginSpec[]
 local plugins = {
 
+  -- Override telescope to search hidden files
+  {
+    "nvim-telescope/telescope.nvim",
+    opts = {
+      defaults = {
+        vimgrep_arguments = {
+          "rg",
+          "-L",
+          "--hidden",
+          "--color=never",
+          "--no-heading",
+          "--with-filename",
+          "--line-number",
+          "--column",
+          "--smart-case",
+        },
+      },
+    },
+  },
+
   -- Override plugin definition options
   {
     "hrsh7th/nvim-cmp",
@@ -326,6 +346,18 @@ local plugins = {
               local ticket = require("gx.helper").find(line, mode, "(%u+-%d+)")
               if ticket and #ticket < 20 then
                 return "https://piwikpro.atlassian.net/browse/" .. ticket
+              end
+            end,
+          },
+          github_action = {
+            name = "github_action",
+            handle = function(mode, line, _)
+              local action = require("gx.helper").find(line, mode, "uses:%s+([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+@[a-zA-Z0-9._-]+)")
+              if action then
+                local owner, repo, ref = action:match("([a-zA-Z0-9_-]+)/([a-zA-Z0-9_-]+)@([a-zA-Z0-9._-]+)")
+                if owner and repo and ref then
+                  return "https://github.com/" .. owner .. "/" .. repo .. "/commit/" .. ref
+                end
               end
             end,
           },
