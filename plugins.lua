@@ -20,6 +20,11 @@ local plugins = {
           "--smart-case",
         },
       },
+      pickers = {
+        find_files = {
+          hidden = true,
+        },
+      },
     },
   },
 
