@@ -34,8 +34,9 @@ local plugins = {
     dependencies = {
       "hrsh7th/cmp-cmdline",
     },
-    opts = {
-      sources = {
+    opts = function(_, opts)
+      local cmp = require "cmp"
+      opts.sources = {
         { name = "emoji" },
         { name = "nvim_lsp" },
         { name = "luasnip" },
@@ -45,8 +46,13 @@ local plugins = {
         per_filetype = {
           codecompanion = { "codecompanion" },
         },
-      },
-    },
+      }
+      opts.mapping = vim.tbl_extend("force", opts.mapping or {}, {
+        ["<Down>"] = cmp.mapping.select_next_item(),
+        ["<Up>"] = cmp.mapping.select_prev_item(),
+      })
+      return opts
+    end,
     config = function(_, opts)
       local cmp = require "cmp"
       cmp.setup(opts)
