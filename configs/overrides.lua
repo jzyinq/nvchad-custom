@@ -58,6 +58,7 @@ M.mason = {
 M.nvimtree = {
   git = {
     enable = true,
+    ignore = false, -- show files listed in .gitignore
   },
 
   renderer = {
