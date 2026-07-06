@@ -546,40 +546,6 @@ local plugins = {
       { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
     },
   },
-  -- {
-  --   "olimorris/codecompanion.nvim",
-  --   version = "^19.0.0",
-  --   cmd = { "CodeCompanion", "CodeCompanionActions", "CodeCompanionChat", "CodeCompanionCmd" },
-  --   dependencies = {
-  --     "nvim-lua/plenary.nvim",
-  --     "nvim-treesitter/nvim-treesitter",
-  --     "ravitemer/mcphub.nvim",
-  --   },
-  --   opts = {
-  --     adapters = {
-  --       acp = {
-  --         claude_code = function()
-  --           return require("codecompanion.adapters").extend("claude_code", {
-  --             env = {
-  --               CLAUDE_CODE_OAUTH_TOKEN = "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",
-  --             },
-  --           })
-  --         end,
-  --       },
-  --     },
-  --     teractions = {
-  --       chat = {
-  --         adapter = "claude_code",
-  --         model = "claude-sonnet-4-6",
-  --       },
-  --     },
-  --     opts = {
-  --       log_level = "DEBUG",
-  --     },
-  --   },
-  },
-  {
-  -- },
   {
     "rcarriga/nvim-notify",
     event = "VeryLazy",
