@@ -67,7 +67,10 @@ local plugins = {
 
       -- `:` command completion
       cmp.setup.cmdline(":", {
-        mapping = cmp.mapping.preset.cmdline(),
+        mapping = vim.tbl_extend("force", cmp.mapping.preset.cmdline(), {
+          ["<Down>"] = { c = cmp.mapping.select_next_item() },
+          ["<Up>"] = { c = cmp.mapping.select_prev_item() },
+        }),
         sources = cmp.config.sources({
           { name = "path" },
         }, {
