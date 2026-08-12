@@ -23,6 +23,13 @@ local plugins = {
       pickers = {
         find_files = {
           hidden = true,
+          file_ignore_patterns = {
+            "/.git/",
+            "/.venv/",
+            "/__pycache__/",
+            "/%.pytest_cache/",
+            "/node_modules/",
+          },
         },
       },
     },

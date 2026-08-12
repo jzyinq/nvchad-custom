@@ -39,5 +39,15 @@ vim.lsp.config("helm_ls", {
   filetypes = { "helm" },
 })
 
+vim.lsp.config("basedpyright", {
+  settings = {
+    basedpyright = {
+      analysis = {
+        typeCheckingMode = "standard",
+      },
+    },
+  }
+})
+
 --
 -- lspconfig.pyright.setup { blabla}
