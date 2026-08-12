@@ -96,6 +96,12 @@ M.git = {
 
 M.lspconfig = {
   n = {
+    ["<leader>ca"] = {
+      function()
+        vim.lsp.buf.code_action { apply = true }
+      end,
+      "LSP code action",
+    },
     ["<leader>lg"] = {
       function()
         vim.lsp.buf.signature_help()
