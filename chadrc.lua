@@ -10,7 +10,7 @@ require "custom.obsidian"
 
 M.ui = {
   theme = "onedark",
-  theme_toggle = { "bearded-arc", "one_light" },
+  theme_toggle = { "onedark", "chocolate" },
   statusline = {
     overriden_modules = function(modules)
       table.insert(modules, 11, writer_mode.statusline_segment())

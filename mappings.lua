@@ -14,6 +14,12 @@ M.general = {
       ":w !sudo tee %<CR>",
       "Write file with sudo",
     },
+    ["<leader>tc"] = {
+      function()
+        require("base46").toggle_theme()
+      end,
+      "Toggle theme",
+    },
   },
   i = {
     ["<S-Tab>"] = { "<C-d>", "Unindent line" },
@@ -58,7 +64,7 @@ M.telescope_project = {
       end,
       "Obsidian grep (60 days)",
     },
-    ["<leader>th"] = {
+    ["<leader>fc"] = {
       ":lua require('telescope.builtin').command_history()<CR>",
       "Command History",
     },
