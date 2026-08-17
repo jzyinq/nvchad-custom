@@ -69,6 +69,15 @@ M.nvimtree = {
       },
     },
   },
+
+  view = {
+    -- grow the tree window to fit the longest visible name (min/max bound), instead of a fixed width
+    adaptive_size = true,
+    width = {
+      min = 30,
+      max = 60,
+    },
+  },
 }
 
 return M
