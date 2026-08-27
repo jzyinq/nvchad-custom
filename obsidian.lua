@@ -379,6 +379,72 @@ M.setup_overdue_indicator = function()
   })
 end
 
+-- Date-range search over daily notes (filenames are YYYY-MM-DD)
+local DAILY_PATH = "/home/jzy/homecloud/backups/obsidian/piwik/daily"
+
+M._months_ago = function(n)
+  local t = os.date("*t")
+  t.month = t.month - n
+  return os.date("%Y-%m-%d", os.time(t))
+end
+
+M._get_daily_note_files_in_range = function(start_date, end_date)
+  local handle = io.popen("find '" .. DAILY_PATH .. "' -maxdepth 1 -type f -name '*.md'")
+  if not handle then
+    return {}
+  end
+  local result = handle:read "*a"
+  handle:close()
+
+  local files = {}
+  for file in result:gmatch "[^\r\n]+" do
+    local filename = file:match "([^/]+)%.md$"
+    if filename and filename:match "^%d%d%d%d%-%d%d%-%d%d$" and filename >= start_date and filename <= end_date then
+      table.insert(files, file)
+    end
+  end
+  table.sort(files)
+  return files
+end
+
+M.search_date_range = function(start_date, end_date)
+  end_date = (end_date and end_date ~= "") and end_date or os.date "%Y-%m-%d"
+  start_date = (start_date and start_date ~= "") and start_date or M._months_ago(1)
+
+  local files = M._get_daily_note_files_in_range(start_date, end_date)
+
+  if #files == 0 then
+    vim.notify(string.format("No daily notes found between %s and %s", start_date, end_date), vim.log.levels.WARN)
+    return
+  end
+
+  require("telescope.builtin").live_grep {
+    prompt_title = string.format("Daily Notes (%s to %s)", start_date, end_date),
+    search_dirs = files,
+  }
+end
+
+M.search_date_range_prompt = function()
+  vim.ui.input({ prompt = "Start date (YYYY-MM-DD) [default -1 month]: " }, function(start_input)
+    if start_input == nil then
+      return
+    end
+    vim.ui.input({ prompt = "End date (YYYY-MM-DD) [default today]: " }, function(end_input)
+      if end_input == nil then
+        return
+      end
+      M.search_date_range(start_input, end_input)
+    end)
+  end)
+end
+
+vim.api.nvim_create_user_command("ObsidianDateRange", function(cmd_opts)
+  M.search_date_range(cmd_opts.fargs[1], cmd_opts.fargs[2])
+end, {
+  nargs = "*",
+  desc = "Search Obsidian daily notes within a date range (defaults to last month)",
+})
+
 -- Auto-setup when module is loaded
 M.setup_overdue_indicator()
 

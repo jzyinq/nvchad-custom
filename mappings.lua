@@ -64,6 +64,18 @@ M.telescope_project = {
       end,
       "Obsidian grep (60 days)",
     },
+    ["<leader>od"] = {
+      function()
+        require("custom.obsidian").search_date_range()
+      end,
+      "Obsidian date range (last month)",
+    },
+    ["<leader>oD"] = {
+      function()
+        require("custom.obsidian").search_date_range_prompt()
+      end,
+      "Obsidian date range (custom)",
+    },
     ["<leader>fc"] = {
       ":lua require('telescope.builtin').command_history()<CR>",
       "Command History",
