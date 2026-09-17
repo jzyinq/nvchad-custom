@@ -76,10 +76,11 @@ M.telescope_project = {
       end,
       "Obsidian date range (custom)",
     },
-    ["<leader>fc"] = {
+    ["<leader>th"] = {
       ":lua require('telescope.builtin').command_history()<CR>",
       "Command History",
     },
+    ["<leader>nt"] = { "<cmd> Telescope themes <CR>", "Nvchad themes" },
     ["<leader>tn"] = {
       ":Telescope notify<CR>",
       "Notifications",
