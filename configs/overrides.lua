@@ -61,6 +61,17 @@ M.nvimtree = {
     ignore = false, -- show files listed in .gitignore
   },
 
+  filters = {
+    -- hide the .git internals, but keep .git/config reachable; toggle live with `U`
+    custom = function(absolute_path)
+      local inside_git = absolute_path:match "/%.git/(.*)$"
+      if inside_git then
+        return inside_git ~= "config"
+      end
+      return false
+    end,
+  },
+
   renderer = {
     highlight_git = true,
     icons = {

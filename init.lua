@@ -24,6 +24,18 @@ autocmd("DirChanged", {
 
 opt.relativenumber = true
 
+-- Helm chart templates: YAML mixed with Go templates. Registered here (early) so
+-- detection happens before the buffer's FileType event; uses the treesitter
+-- "helm" parser for highlighting and helm_ls instead of yamlls.
+vim.filetype.add {
+  pattern = {
+    [".*/templates/.*%.ya?ml"] = "helm",
+    [".*/templates/.*%.tpl"] = "helm",
+    [".*/templates/NOTES%.txt"] = "helm",
+    ["helmfile.*%.ya?ml"] = "helm",
+  },
+}
+
 -- autocmd("BufEnter", {
 --   callback = function()
 --     require "async"(function()

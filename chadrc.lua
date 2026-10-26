@@ -8,6 +8,9 @@ local writer_mode = require "custom.writer_mode"
 -- Load obsidian module (registers autocommands for overdue tasks indicator)
 require "custom.obsidian"
 
+-- Docs on hover for git config files (completion is wired up in custom.plugins)
+require("custom.gitconfig").setup()
+
 M.ui = {
   theme = "onedark",
   theme_toggle = { "onedark", "chocolate" },

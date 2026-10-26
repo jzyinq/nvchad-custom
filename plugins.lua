@@ -52,6 +52,7 @@ local plugins = {
         { name = "path" },
         per_filetype = {
           codecompanion = { "codecompanion" },
+          gitconfig = { "gitconfig", "buffer", "path" },
         },
       }
       opts.mapping = vim.tbl_extend("force", opts.mapping or {}, {
@@ -62,7 +63,18 @@ local plugins = {
     end,
     config = function(_, opts)
       local cmp = require "cmp"
+
+      require("custom.gitconfig").register_cmp_source()
       cmp.setup(opts)
+
+      -- git config keys, ahead of buffer words and snippets
+      cmp.setup.filetype("gitconfig", {
+        sources = {
+          { name = "gitconfig" },
+          { name = "path" },
+          { name = "buffer" },
+        },
+      })
 
       -- `/` search completion
       cmp.setup.cmdline("/", {
@@ -106,6 +118,11 @@ local plugins = {
         "go",
         "markdown",
         "yaml",
+        "helm",
+        "gotmpl",
+
+        -- git config files (see custom.gitconfig)
+        "git_config",
       },
     },
   },
@@ -312,12 +329,37 @@ local plugins = {
     dependencies = {
       "nvim-lua/plenary.nvim",
     },
-    -- setting the keybinding for LazyGit with 'keys' is recommended in
-    -- order to load the plugin when the command is run for the first time
-    keys = {
-      { "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
+    init = function()
+      -- lazygit's nvim-remote preset opens the file in a new tab before lazygit exits,
+      -- then lazygit.nvim's on_exit jumps back to the previous window; return to the file's tab
+      vim.api.nvim_create_autocmd("TabNewEntered", {
+        callback = function()
+          if vim.g.lazygit_opened == 1 then
+            vim.g.lazygit_edit_tab = vim.api.nvim_get_current_tabpage()
+          end
+        end,
+      })
+      vim.g.lazygit_on_exit_callback = function()
+        local tab = vim.g.lazygit_edit_tab
+        vim.g.lazygit_edit_tab = nil
+        if tab and vim.api.nvim_tabpage_is_valid(tab) then
+          vim.api.nvim_set_current_tabpage(tab)
+        end
+      end
+    end,
+  },
+  {
+    "sindrets/diffview.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory", "DiffviewToggleFiles", "DiffviewRefresh" },
+    opts = {
+      enhanced_diff_hl = true,
+      view = {
+        merge_tool = { layout = "diff3_mixed" },
+      },
     },
   },
+
   {
     "chrishrb/gx.nvim",
     keys = { { "gx", "<cmd>Browse<cr>", mode = { "n", "x" } } },
@@ -471,6 +513,8 @@ local plugins = {
       -- E.g. "BufReadPre " .. vim.fn.expand "~" .. "/my-vault/**.md"
       "BufReadPre /home/jzy/homecloud/backups/obsidian/piwik/**.md",
       "BufNewFile /home/jzy/homecloud/backups/obsidian/piwik/**.md",
+      "BufReadPre /home/jzy/homecloud/backups/obsidian/storytel/**.md",
+      "BufNewFile /home/jzy/homecloud/backups/obsidian/storytel/**.md",
     },
     dependencies = {
       -- Required.
@@ -491,6 +535,10 @@ local plugins = {
         {
           name = "piwik",
           path = "/home/jzy/homecloud/backups/obsidian/piwik",
+        },
+        {
+          name = "storytel",
+          path = "/home/jzy/homecloud/backups/obsidian/storytel",
         },
       },
 

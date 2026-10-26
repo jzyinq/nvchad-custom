@@ -12,6 +12,16 @@ local function get_yesterday_date()
   return os.date("%Y-%m-%d", yesterday)
 end
 
+-- get current datetime in a compact format of YYYYMMDDHHMMSS (e.g. migration filenames)
+local function get_datetime_compact()
+  return os.date "%Y%m%d%H%M%S"
+end
+
+-- get current unix timestamp (seconds since epoch)
+local function get_unix_timestamp()
+  return tostring(os.time())
+end
+
 -- function to get the next occurrence date for a given day abbreviation
 local function get_next_day_date(day_abbr)
   local days = {
@@ -82,6 +92,16 @@ ls.add_snippets("all", {
   snippet("yesterday", {
     ls.function_node(function()
       return get_yesterday_date()
+    end),
+  }),
+  snippet("datetime-compact", {
+    ls.function_node(function()
+      return get_datetime_compact()
+    end),
+  }),
+  snippet("timestamp", {
+    ls.function_node(function()
+      return get_unix_timestamp()
     end),
   }),
 })

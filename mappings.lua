@@ -80,6 +80,12 @@ M.telescope_project = {
       ":lua require('telescope.builtin').command_history()<CR>",
       "Command History",
     },
+    ["<leader>sh"] = {
+      function()
+        require("custom.zsh_history").search()
+      end,
+      "Zsh history (paste command)",
+    },
     ["<leader>nt"] = { "<cmd> Telescope themes <CR>", "Nvchad themes" },
     ["<leader>tn"] = {
       ":Telescope notify<CR>",
@@ -109,7 +115,28 @@ M.venv_select = {
 
 M.git = {
   n = {
-    ["<leader>gg"] = { "<cmd>:LazyGit<cr>", "Lazy git" },
+    ["<leader>gg"] = { "<cmd>:LazyGitCurrentFile<cr>", "Lazy git (current file's repo)" },
+    ["<leader>gd"] = {
+      function()
+        require("custom.diffview").open_against_branch()
+      end,
+      "Diffview against branch",
+    },
+    ["<leader>gD"] = { "<cmd>DiffviewClose<cr>", "Diffview close" },
+    ["<leader>gf"] = { "<cmd>DiffviewFileHistory %<cr>", "Diffview file history" },
+    ["<leader>gF"] = { "<cmd>DiffviewFileHistory<cr>", "Diffview branch history" },
+    ["<leader>gB"] = {
+      function()
+        require("custom.diffview").set_gitsigns_base()
+      end,
+      "Gitsigns base branch",
+    },
+    ["<leader>gR"] = {
+      function()
+        require("custom.diffview").reset_gitsigns_base()
+      end,
+      "Gitsigns base reset",
+    },
   },
 }
 
@@ -276,6 +303,30 @@ M.link_utils = {
       end,
       "Toggle Writer Mode (80 chars, no completion)",
     },
+    ["<leader>zz"] = {
+      function()
+        local enabled = not vim.opt_local.spell:get()
+        vim.opt_local.spell = enabled
+        if enabled then
+          vim.opt_local.spelllang = { "pl", "en" }
+        end
+        vim.notify(
+          enabled and "Spellcheck enabled (pl, en)" or "Spellcheck disabled",
+          vim.log.levels.INFO,
+          { title = "Spellcheck" }
+        )
+      end,
+      "Toggle spellcheck (pl, en)",
+    },
+    ["<leader>zs"] = {
+      function()
+        require("telescope.builtin").spell_suggest(require("telescope.themes").get_cursor {})
+      end,
+      "Spelling suggestions for word under cursor",
+    },
+    ["<leader>za"] = { "zg", "Add word under cursor to dictionary" },
+    ["<leader>zA"] = { "zw", "Mark word under cursor as misspelled" },
+    ["<leader>zu"] = { "zug", "Undo add/mark word under cursor" },
   },
 }
 
