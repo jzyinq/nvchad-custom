@@ -503,6 +503,20 @@ local plugins = {
     end,
   },
   {
+    "tadmccorkle/markdown.nvim",
+    ft = "markdown",
+    opts = {
+      mappings = {
+        inline_surround_toggle = "gs", -- gs{motion}{b|i|s|c}, visual: gs{b|i|s|c}
+        inline_surround_toggle_line = "gss",
+        -- keep nvim-surround's ds/cs working in markdown buffers
+        inline_surround_delete = "gsd",
+        inline_surround_change = "gsc",
+        link_follow = false, -- keep gx.nvim's gx
+      },
+    },
+  },
+  {
     "obsidian-nvim/obsidian.nvim",
     version = "*", -- recommended, use latest release instead of latest commit
     lazy = true,
