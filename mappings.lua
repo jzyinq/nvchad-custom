@@ -20,6 +20,12 @@ M.general = {
       end,
       "Toggle theme",
     },
+    ["<leader>rr"] = {
+      function()
+        require("custom.reload").reload()
+      end,
+      "Reload config",
+    },
   },
   i = {
     ["<S-Tab>"] = { "<C-d>", "Unindent line" },
@@ -103,7 +109,7 @@ M.telescope_project = {
       "<cmd>Telescope lsp_workspace_symbols<CR>",
       "Workspace symbols",
     },
-    ["<leader>fe"] = {
+    ["<leader>te"] = {
       function()
         require("custom.emoji_picker").pick()
       end,

@@ -11,6 +11,7 @@ opt.foldenable = false
 
 local autocmd = vim.api.nvim_create_autocmd
 autocmd("DirChanged", {
+  group = vim.api.nvim_create_augroup("CustomVenvAutoload", { clear = true }),
   callback = function()
     local venv_dir_names = { "venv", ".venv" }
     for _, dir_name in ipairs(venv_dir_names) do
