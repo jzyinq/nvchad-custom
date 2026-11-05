@@ -11,7 +11,8 @@ Everything in this repo is ours:
 
 - `init.lua` - bootstraps lazy.nvim, loads NvChad + `lua/plugins`, then options/autocmds/mappings
 - `lua/chadrc.lua` - NvChad settings (schema: `nvconfig.lua` in NvChad/ui v3.0): theme, statusline
-  (writer-mode module), nvdash, floating term size, `M.mason.pkgs` for `:MasonInstallAll`
+  (writer-mode module), nvdash, floating term size, colour highlighting (NvChad's colorify, swatch
+  mode; replaced nvim-colorizer), `M.mason.pkgs` for `:MasonInstallAll`
 - `lua/options.lua` / `lua/autocmds.lua` / `lua/mappings.lua` - load NvChad defaults first, then ours
 - `lua/plugins/init.lua` - plugin specs; specs for NvChad's own plugins are merged with its specs
   (note: lists in `opts` replace NvChad's lists, they are not extended)

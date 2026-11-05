@@ -237,25 +237,6 @@ local plugins = {
     end,
     dependencies = { { "nvim-tree/nvim-web-devicons" } },
   },
-  -- Override colorizer to use new structured options format
-  {
-    "NvChad/nvim-colorizer.lua",
-    event = "User FilePost", -- was a NvChad v2.0 built-in; v2.5 ships colorify instead (disabled in chadrc)
-    opts = {
-      options = {
-        parsers = {
-          names = { enable = true },
-          hex = { default = true },
-          rgb = { enable = false },
-          hsl = { enable = false },
-        },
-        display = {
-          mode = "background",
-        },
-      },
-    },
-  },
-
   -- All NvChad plugins are lazy-loaded by default
   -- For a plugin to be loaded, you will need to set either `ft`, `cmd`, `keys`, `event`, or set `lazy = false`
   -- If you want a plugin to load on startup, add `lazy = false` to a plugin spec, for example

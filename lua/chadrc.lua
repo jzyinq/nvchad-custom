@@ -47,8 +47,9 @@ M.term = {
   float = { row = 0.1, col = 0.05, width = 0.9, height = 0.8 },
 }
 
--- nvim-colorizer.lua (plugins/init.lua) keeps doing colour highlighting
-M.colorify = { enabled = false }
+-- colour highlighting: #rrggbb, plus rgb()/hsl() etc. reported by LSP (e.g. cssls)
+-- "virtual" = small coloured swatch before the code; also "bg" / "fg"
+M.colorify = { enabled = true, mode = "virtual" }
 
 -- installed by :MasonInstallAll
 M.mason = {
