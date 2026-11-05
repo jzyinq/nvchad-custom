@@ -1,54 +1,43 @@
--- vim.o.foldcolumn = "1" -- '0' is not bad
--- vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
--- vim.o.foldlevelstart = 99
--- vim.o.foldenable = true
-local vim = vim
-local opt = vim.opt
-opt.foldmethod = "expr"
-opt.foldexpr = "nvim_treesitter#foldexpr()"
-opt.foldlevel = 99
-opt.foldenable = false
+vim.g.base46_cache = vim.fn.stdpath "data" .. "/base46/"
+vim.g.mapleader = " "
 
-local autocmd = vim.api.nvim_create_autocmd
-autocmd("DirChanged", {
-  group = vim.api.nvim_create_augroup("CustomVenvAutoload", { clear = true }),
-  callback = function()
-    local venv_dir_names = { "venv", ".venv" }
-    for _, dir_name in ipairs(venv_dir_names) do
-      local venv = vim.fn.finddir(dir_name, vim.fn.getcwd() .. ";")
-      if venv ~= "" then
-        require("venv-selector").retrieve_from_cache()
-      end
-    end
-  end,
-})
+-- custom snippets (read by nvchad.configs.luasnip)
+-- lua snippets are loaded eagerly in plugins/init.lua (LuaSnip spec); dates.lua adds
+-- snippets for "all", which lazy_load (keyed by filetype) would never pick up
+vim.g.custom_lua_snippets_path = vim.fn.stdpath "config" .. "/lua/custom/snippets"
+vim.g.vscode_snippets_path = vim.fn.stdpath "config" .. "/lua/custom/snippets"
 
-opt.relativenumber = true
+-- bootstrap lazy and all plugins
+local lazypath = vim.fn.stdpath "data" .. "/lazy/lazy.nvim"
 
--- Helm chart templates: YAML mixed with Go templates. Registered here (early) so
--- detection happens before the buffer's FileType event; uses the treesitter
--- "helm" parser for highlighting and helm_ls instead of yamlls.
-vim.filetype.add {
-  pattern = {
-    [".*/templates/.*%.ya?ml"] = "helm",
-    [".*/templates/.*%.tpl"] = "helm",
-    [".*/templates/NOTES%.txt"] = "helm",
-    ["helmfile.*%.ya?ml"] = "helm",
+if not vim.uv.fs_stat(lazypath) then
+  local repo = "https://github.com/folke/lazy.nvim.git"
+  vim.fn.system { "git", "clone", "--filter=blob:none", repo, "--branch=stable", lazypath }
+end
+
+vim.opt.rtp:prepend(lazypath)
+
+local lazy_config = require "configs.lazy"
+
+-- load plugins
+require("lazy").setup({
+  {
+    "NvChad/NvChad",
+    lazy = false,
+    branch = "v2.5",
+    import = "nvchad.plugins",
   },
-}
 
--- autocmd("BufEnter", {
---   callback = function()
---     require "async"(function()
---       local bufnr = vim.api.nvim_get_current_buf()
---       -- make sure buffer is attached
---       require("ufo").attach(bufnr)
---       -- getFolds return Promise if providerName == 'lsp'
---       local ranges = await(require("ufo").getFolds(bufnr, providerName))
---       local ok = require("ufo").applyFolds(bufnr, ranges)
---       if ok then
---         require("ufo").closeAllFolds()
---       end
---     end)
---   end,
--- })
+  { import = "plugins" },
+}, lazy_config)
+
+-- load theme
+dofile(vim.g.base46_cache .. "defaults")
+dofile(vim.g.base46_cache .. "statusline")
+
+require "options"
+require "autocmds"
+
+vim.schedule(function()
+  require "mappings"
+end)

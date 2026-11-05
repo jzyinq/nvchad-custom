@@ -1,5 +1,6 @@
 local cwd = vim.fn.getcwd()
-package.path = cwd .. "/?.lua;" .. cwd .. "/?/init.lua;" .. package.path
+-- run from lua/custom; plugin specs live in lua/plugins/init.lua and require custom.*
+package.path = cwd .. "/?.lua;" .. cwd .. "/?/init.lua;" .. cwd .. "/../?.lua;" .. cwd .. "/../?/init.lua;" .. package.path
 
 local captured
 
@@ -38,7 +39,7 @@ local function expect_equal(actual, expected, message)
   end
 end
 
-local plugins = dofile(cwd .. "/plugins.lua")
+local plugins = dofile(cwd .. "/../plugins/init.lua")
 local gx_spec
 
 for _, spec in ipairs(plugins) do

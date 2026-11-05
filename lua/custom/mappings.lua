@@ -3,8 +3,37 @@ local M = {}
 
 M.disabled = {
   n = {
-    ["<leader>v"] = "",
-    ["<leader>ls"] = "",
+    ["<leader>v"] = "", -- new vertical term; clashes with <leader>vs / <leader>vc
+    ["<C-c>"] = "", -- copy whole file
+    ["<leader>ds"] = "", -- diagnostic loclist (kept on <leader>q); clashes with <leader>d
+  },
+}
+
+-- Edits previously made directly in NvChad v2.0's lua/core/mappings.lua,
+-- plus v2.0 defaults that v2.5 dropped.
+M.editing = {
+  n = {
+    ["<leader>d"] = { "d", "delete and yank" },
+    ["<C-u>"] = { "<C-u>zz", "Page up centered" },
+    ["<C-d>"] = { "<C-d>zz", "Page down centered" },
+    ["<Up>"] = { 'v:count || mode(1)[0:1] == "no" ? "k" : "gk"', "Move up", opts = { expr = true } },
+    ["<Down>"] = { 'v:count || mode(1)[0:1] == "no" ? "j" : "gj"', "Move down", opts = { expr = true } },
+    ["<leader>q"] = { vim.diagnostic.setloclist, "Diagnostic setloclist" },
+    ["<leader>lf"] = {
+      function()
+        vim.diagnostic.open_float { border = "rounded" }
+      end,
+      "Floating diagnostic",
+    },
+  },
+  v = {
+    ["d"] = { '"_d', "delete without yanking" },
+    ["<leader>d"] = { "d", "delete and yank" },
+    ["p"] = { '"_dP', "replace text without yanking it" },
+    ["<"] = { "<gv", "Indent line" },
+    [">"] = { ">gv", "Indent line" },
+    ["<Up>"] = { 'v:count || mode(1)[0:1] == "no" ? "k" : "gk"', "Move up", opts = { expr = true } },
+    ["<Down>"] = { 'v:count || mode(1)[0:1] == "no" ? "j" : "gj"', "Move down", opts = { expr = true } },
   },
 }
 M.general = {
@@ -20,12 +49,8 @@ M.general = {
       end,
       "Toggle theme",
     },
-    ["<leader>rr"] = {
-      function()
-        require("custom.reload").reload()
-      end,
-      "Reload config",
-    },
+    -- Neovim 0.12+: restart and restore the session (buffers, windows, tabs)
+    ["<leader>rr"] = { "<cmd>restart<CR>", "Restart nvim (reload config)" },
   },
   i = {
     ["<S-Tab>"] = { "<C-d>", "Unindent line" },
@@ -92,7 +117,12 @@ M.telescope_project = {
       end,
       "Zsh history (paste command)",
     },
-    ["<leader>nt"] = { "<cmd> Telescope themes <CR>", "Nvchad themes" },
+    ["<leader>nt"] = {
+      function()
+        require("nvchad.themes").open()
+      end,
+      "Nvchad themes",
+    },
     ["<leader>tn"] = {
       ":Telescope notify<CR>",
       "Notifications",
@@ -160,6 +190,8 @@ M.lspconfig = {
       end,
       "LSP code action",
     },
+    ["gi"] = { vim.lsp.buf.implementation, "LSP implementation" },
+    ["gr"] = { vim.lsp.buf.references, "LSP references" },
     ["<leader>lg"] = {
       function()
         vim.lsp.buf.signature_help()
@@ -167,6 +199,10 @@ M.lspconfig = {
       "LSP signature help",
     },
   },
+}
+
+M.lspconfig.v = {
+  ["<leader>ca"] = { vim.lsp.buf.code_action, "LSP code action" },
 }
 
 M.python_reference = {

@@ -6,6 +6,12 @@ local plugins = {
   -- Override telescope to search hidden files
   {
     "nvim-telescope/telescope.nvim",
+    dependencies = { { "nvim-telescope/telescope-fzf-native.nvim", build = "make" } },
+    config = function(_, opts)
+      local telescope = require "telescope"
+      telescope.setup(opts)
+      pcall(telescope.load_extension, "fzf")
+    end,
     opts = {
       defaults = {
         vimgrep_arguments = {
@@ -35,11 +41,53 @@ local plugins = {
     },
   },
 
+  -- own lua snippets (see init.lua)
+  {
+    "L3MON4D3/LuaSnip",
+    config = function(_, opts)
+      require("luasnip").config.set_config(opts)
+      require "nvchad.configs.luasnip"
+      require("luasnip.loaders.from_lua").load { paths = vim.g.custom_lua_snippets_path }
+    end,
+  },
+
+  -- hunk mappings that NvChad v2.0 set up and v2.5 does not
+  {
+    "lewis6991/gitsigns.nvim",
+    opts = {
+      on_attach = function(bufnr)
+        local gs = require "gitsigns"
+        local function map(lhs, rhs, desc, extra)
+          vim.keymap.set("n", lhs, rhs, vim.tbl_extend("force", { buffer = bufnr, desc = desc }, extra or {}))
+        end
+        local function nav(dir, key)
+          return function()
+            if vim.wo.diff then
+              return key
+            end
+            vim.schedule(function()
+              gs.nav_hunk(dir)
+            end)
+            return "<Ignore>"
+          end
+        end
+        map("]c", nav("next", "]c"), "Jump to next hunk", { expr = true })
+        map("[c", nav("prev", "[c"), "Jump to prev hunk", { expr = true })
+        map("<leader>rh", gs.reset_hunk, "Reset hunk")
+        map("<leader>ph", gs.preview_hunk, "Preview hunk")
+        map("<leader>gb", gs.blame_line, "Blame line")
+      end,
+    },
+  },
+
   -- Override plugin definition options
   {
     "hrsh7th/nvim-cmp",
     dependencies = {
       "hrsh7th/cmp-cmdline",
+      -- were bundled with NvChad v2.0, not v2.5
+      "hrsh7th/cmp-emoji",
+      "hrsh7th/cmp-path",
     },
     opts = function(_, opts)
       local cmp = require "cmp"
@@ -100,54 +148,6 @@ local plugins = {
   },
 
   {
-    "nvim-treesitter/nvim-treesitter",
-    opts = {
-      ensure_installed = {
-        -- defaults
-        "vim",
-        "lua",
-
-        -- web dev
-        "html",
-        "css",
-        "javascript",
-        "typescript",
-        "tsx",
-        "json",
-        "python",
-        "go",
-        "markdown",
-        "yaml",
-        "helm",
-        "gotmpl",
-
-        -- git config files (see custom.gitconfig)
-        "git_config",
-      },
-    },
-  },
-  {
-    "NvChad/nvterm",
-    opts = {
-      terminals = {
-        type_opts = {
-          float = {
-            row = 0.1,
-            col = 0.05,
-            width = 0.9,
-            height = 0.8,
-          },
-        },
-      },
-      behavior = {
-        auto_close_on_quit = {
-          enabled = true,
-        },
-      },
-    },
-  },
-
-  {
     "neovim/nvim-lspconfig",
     dependencies = {
       -- format & linting
@@ -159,16 +159,13 @@ local plugins = {
       },
     },
     config = function()
-      require "plugins.configs.lspconfig"
+      require("nvchad.configs.lspconfig").defaults()
       require "custom.configs.lspconfig"
-    end, -- Override to setup mason-lspconfig
+    end,
   },
 
   -- override plugin configs
-  {
-    "williamboman/mason.nvim",
-    opts = overrides.mason,
-  },
+  -- mason packages are listed in chadrc.lua (M.mason.pkgs), install with :MasonInstallAll
 
   {
     "nvim-treesitter/nvim-treesitter",
@@ -243,6 +240,7 @@ local plugins = {
   -- Override colorizer to use new structured options format
   {
     "NvChad/nvim-colorizer.lua",
+    event = "User FilePost", -- was a NvChad v2.0 built-in; v2.5 ships colorify instead (disabled in chadrc)
     opts = {
       options = {
         parsers = {
