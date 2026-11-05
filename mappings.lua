@@ -103,6 +103,12 @@ M.telescope_project = {
       "<cmd>Telescope lsp_workspace_symbols<CR>",
       "Workspace symbols",
     },
+    ["<leader>fe"] = {
+      function()
+        require("custom.emoji_picker").pick()
+      end,
+      "Emoji picker (copy to clipboard)",
+    },
   },
 }
 
