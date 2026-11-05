@@ -17,6 +17,13 @@ M.treesitter = {
     "go",
     "yaml",
     "bash",
+    "helm",
+    "gotmpl",
+    "git_config", -- see custom.gitconfig
+    -- NvChad defaults (a list here replaces NvChad's, it doesn't extend it)
+    "luadoc",
+    "printf",
+    "vimdoc",
   },
   highlight = {
     enable = true,
@@ -30,29 +37,6 @@ M.treesitter = {
   },
 }
 
-M.mason = {
-  ensure_installed = {
-    -- lua stuff
-    "lua-language-server",
-    "stylua",
-
-    -- web dev stuff
-    "css-lsp",
-    "html-lsp",
-    "typescript-language-server",
-    "json-lsp",
-    "deno",
-    "prettier",
-
-    -- c/cpp stuff
-    "clangd",
-    "clang-format",
-
-    -- python stuff
-    "ruff",
-    -- "basedpyright",
-  },
-}
 
 -- git support in nvimtree
 M.nvimtree = {

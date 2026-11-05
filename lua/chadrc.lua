@@ -1,49 +1,87 @@
+-- Structure follows nvconfig.lua: https://github.com/NvChad/ui/blob/v3.0/lua/nvconfig.lua
+
 ---@type ChadrcConfig
 local M = {}
 
--- Path to overriding theme and highlights files
 local highlights = require "custom.highlights"
 local writer_mode = require "custom.writer_mode"
 
--- Load obsidian module (registers autocommands for overdue tasks indicator)
-require "custom.obsidian"
-
--- Docs on hover for git config files (completion is wired up in custom.plugins)
-require("custom.gitconfig").setup()
-
-M.ui = {
+M.base46 = {
   theme = "onedark",
   theme_toggle = { "onedark", "chocolate" },
-  statusline = {
-    overriden_modules = function(modules)
-      table.insert(modules, 11, writer_mode.statusline_segment())
-    end,
-  },
-
   hl_override = highlights.override,
   hl_add = highlights.add,
-  nvdash = {
-    load_on_startup = false,
-    header = {
-      "                                                     ",
-      "  ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗ ",
-      "  ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║ ",
-      "  ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║ ",
-      "  ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║ ",
-      "  ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║ ",
-      "  ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝ ",
-      "                                                     ",
-    },
-    buttons = {
-      { "󱃸  Find Projects", "Spc f p", "Telescope project" },
-      { "  Find File", "Spc f f", "Telescope find_files" },
-      { "  Configure NvChad", "Spc c n", "edit ~/.config/nvim/chadrc.lua" },
+}
+
+M.ui = {
+  statusline = {
+    -- default order + writer mode word count at the end
+    order = { "mode", "file", "git", "%=", "lsp_msg", "%=", "diagnostics", "lsp", "cwd", "cursor", "writer" },
+    modules = {
+      writer = writer_mode.statusline_segment,
     },
   },
 }
 
-M.plugins = "custom.plugins"
--- check core.mappings for table structure
-M.mappings = require "custom.mappings"
+M.nvdash = {
+  load_on_startup = false,
+  header = {
+    "                                                     ",
+    "  ███╗   ██╗███████╗ ██████╗ ██╗   ██╗██╗███╗   ███╗ ",
+    "  ████╗  ██║██╔════╝██╔═══██╗██║   ██║██║████╗ ████║ ",
+    "  ██╔██╗ ██║█████╗  ██║   ██║██║   ██║██║██╔████╔██║ ",
+    "  ██║╚██╗██║██╔══╝  ██║   ██║╚██╗ ██╔╝██║██║╚██╔╝██║ ",
+    "  ██║ ╚████║███████╗╚██████╔╝ ╚████╔╝ ██║██║ ╚═╝ ██║ ",
+    "  ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚═══╝  ╚═╝╚═╝     ╚═╝ ",
+    "                                                     ",
+  },
+  buttons = {
+    { txt = "󱃸  Find Projects", keys = "fp", cmd = "Telescope project" },
+    { txt = "  Find File", keys = "ff", cmd = "Telescope find_files" },
+    { txt = "  Configure NvChad", keys = "cn", cmd = "edit ~/.config/nvim/lua/chadrc.lua" },
+  },
+}
+
+-- floating terminal (<A-i>): was configured on nvterm in v2.0
+M.term = {
+  float = { row = 0.1, col = 0.05, width = 0.9, height = 0.8 },
+}
+
+-- nvim-colorizer.lua (plugins/init.lua) keeps doing colour highlighting
+M.colorify = { enabled = false }
+
+-- installed by :MasonInstallAll
+M.mason = {
+  -- same set as the old config's mason install
+  pkgs = {
+    "basedpyright",
+    "bash-language-server",
+    "clang-format",
+    "clangd",
+    "css-lsp",
+    "deno",
+    "go-debug-adapter",
+    "gofumpt",
+    "goimports",
+    "golangci-lint",
+    "golines",
+    "gopls",
+    "helm-ls",
+    "html-lsp",
+    "json-lsp",
+    "lua-language-server",
+    "marksman",
+    "nilaway",
+    "prettier",
+    "pyright",
+    "ruff",
+    "shellcheck",
+    "stylua",
+    "tilt",
+    "typescript-language-server",
+    "vtsls",
+    "yaml-language-server",
+  },
+}
 
 return M
