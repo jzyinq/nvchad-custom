@@ -10,4 +10,5 @@ nvim   # lazy.nvim installs plugins on first start
 Then inside nvim: `:MasonInstallAll` (LSP servers/formatters) and `:TSInstallAll`
 (treesitter parsers; needs the `tree-sitter` CLI on PATH).
 
-The `master` branch still holds the old NvChad v2.0 layout (only `lua/custom/`).
+The migration from the old NvChad v2.0 layout (where only `lua/custom/` was tracked) is commit
+`e020762`; its step-by-step history is on the `nvchad25` branch.
