@@ -26,16 +26,28 @@ Everything in this repo is ours:
   - `obsidian.lua`, `link_utils.lua`, `gitconfig.lua`, `diffview.lua`, `zsh_history.lua`,
     `emoji_picker.lua`, `writer_mode.lua`, `highlights.lua`, `snippets/`, `tests/`
 - `after/ftplugin/`, `spell/` - filetype tweaks and the spell dictionary
+- `.claude/skills/` - project skills (the only tracked part of `.claude/`; see `.gitignore`):
+  - `verify-config` - start nvim in tmux on real files and check LSP, highlighting, errors;
+    keymap/plugin dumps for before/after diffs
+  - `update-plugins` - update plugins/NvChad/parsers/Mason and review `lazy-lock.json`
+  - `commit-checklist` - before every commit: keep this file and README.md in sync with the code
 
 ## Guidelines
 
+- Before committing, follow the `commit-checklist` skill: update this file in the same commit
+  whenever the change makes it wrong or incomplete.
+- After changing behaviour, verify with the `verify-config` skill.
 - Put customizations in this repo only; never edit NvChad's files under `~/.local/share`.
 - Keymaps go in `lua/custom/mappings.lua`; plugin keymaps can also use lazy `keys`.
 - `<leader>rr` runs `:restart` (reloads the whole config, restores the session).
 - Verify changes with a real UI, not plain `--headless`: NvChad loads LSP, gitsigns, etc. on the
-  `User FilePost` event, which only fires after `UIEnter`. Running nvim inside `tmux` and dumping
-  state from a deferred Lua function works.
+  `User FilePost` event, which only fires after `UIEnter` (`verify-config` handles this via tmux).
 - `luac` may be unavailable; load files with `nvim --headless` for syntax checks.
 - Treesitter is the `main` branch of nvim-treesitter: parsers are compiled with the `tree-sitter`
   CLI (`~/.local/bin/tree-sitter`), highlighting starts via NvChad's FileType autocmd, and folding
   uses `vim.treesitter.foldexpr()`.
+- When checking highlighting, test captures (`vim.treesitter.get_captures_at_pos`), not just that a
+  highlighter is active: it stays "active" even when the highlight queries are missing.
+- The data dir (`~/.local/share/nvim`) is not relocatable: nvim-treesitter links
+  `site/queries/<lang>` with absolute paths, and Mason's Python venvs and wrapper scripts embed
+  absolute paths too. After moving it, re-point those links and reinstall Mason packages.

@@ -1,2 +1,8 @@
 **/.DS_Store
 .luarc.json
+
+# Claude Code: share project skills only (settings.local.json, logs etc. stay local).
+# Overrides the global ~/.gitignore entry for .claude.
+!.claude/
+.claude/*
+!.claude/skills/
