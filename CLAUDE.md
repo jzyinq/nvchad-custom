@@ -40,6 +40,10 @@ Everything in this repo is ours:
 - Put customizations in this repo only; never edit NvChad's files under `~/.local/share`.
 - Keymaps go in `lua/custom/mappings.lua`; plugin keymaps can also use lazy `keys`.
 - `<leader>rr` runs `:restart` (reloads the whole config, restores the session).
+- Files changed on disk reload automatically (`autoread` + `:checktime` on focus/BufEnter/CursorHold,
+  `CustomAutoReload` group in `lua/custom/init.lua`); `<leader>re` forces `:edit!` (drops unsaved edits).
+  When testing: `:checktime` run from an autocmd is postponed to the main loop, so check the buffer
+  after a `vim.defer_fn`, not right after firing the event.
 - Verify changes with a real UI, not plain `--headless`: NvChad loads LSP, gitsigns, etc. on the
   `User FilePost` event, which only fires after `UIEnter` (`verify-config` handles this via tmux).
 - `luac` may be unavailable; load files with `nvim --headless` for syntax checks.

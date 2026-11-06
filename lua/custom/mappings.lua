@@ -51,6 +51,7 @@ M.general = {
     },
     -- Neovim 0.12+: restart and restore the session (buffers, windows, tabs)
     ["<leader>rr"] = { "<cmd>restart<CR>", "Restart nvim (reload config)" },
+    ["<leader>re"] = { "<cmd>edit!<CR>", "Reload file from disk (discard unsaved changes)" },
   },
   i = {
     ["<S-Tab>"] = { "<C-d>", "Unindent line" },

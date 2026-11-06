@@ -25,6 +25,27 @@ autocmd("DirChanged", {
 
 opt.relativenumber = true
 
+-- Auto-reload files changed on disk (Obsidian, Claude Code, git, ...).
+-- 'autoread' only acts when :checktime runs, so trigger it on focus/buffer
+-- switch and when idle in normal mode (CursorHold; never while typing in
+-- insert mode). Buffers with unsaved edits are not reloaded; nvim asks
+-- instead (W12).
+opt.autoread = true
+autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
+  group = vim.api.nvim_create_augroup("CustomAutoReload", { clear = true }),
+  callback = function()
+    if vim.fn.mode() ~= "c" and vim.fn.getcmdwintype() == "" then
+      vim.cmd "checktime"
+    end
+  end,
+})
+autocmd("FileChangedShellPost", {
+  group = "CustomAutoReload",
+  callback = function(args)
+    vim.notify("Reloaded from disk: " .. vim.fn.fnamemodify(args.file, ":t"), vim.log.levels.INFO)
+  end,
+})
+
 -- Helm chart templates: YAML mixed with Go templates. Registered here (early) so
 -- detection happens before the buffer's FileType event; uses the treesitter
 -- "helm" parser for highlighting and helm_ls instead of yamlls.
