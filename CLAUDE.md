@@ -39,6 +39,10 @@ Everything in this repo is ours:
 - After changing behaviour, verify with the `verify-config` skill.
 - Put customizations in this repo only; never edit NvChad's files under `~/.local/share`.
 - Keymaps go in `lua/custom/mappings.lua`; plugin keymaps can also use lazy `keys`.
+- Link pasting (`lua/custom/link_utils.lua`): `<leader>pp`/`<leader>pP` build the link text from the
+  URL alone and must never touch the network. Only `<leader>pf` fetches the page title (curl, 2 s
+  cap), on purpose on its own key: fetching a one-time link (magic login, reset) can use it up.
+  A fetched title is untrusted text; keep the escaping in `_clean_title`.
 - `<leader>rr` runs `:restart` (reloads the whole config, restores the session).
 - Files changed on disk reload automatically (`autoread` + `:checktime` on focus/BufEnter/CursorHold,
   `CustomAutoReload` group in `lua/custom/init.lua`); `<leader>re` forces `:edit!` (drops unsaved edits).

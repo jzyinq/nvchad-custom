@@ -129,6 +129,121 @@ local function get_url_host(url)
   return host and host:gsub("^www%.", "") or nil
 end
 
+local html_entities = {
+  lt = "<",
+  gt = ">",
+  quot = '"',
+  apos = "'",
+  nbsp = " ",
+  ndash = "–",
+  mdash = "—",
+  hellip = "…",
+  lsquo = "‘",
+  rsquo = "’",
+  ldquo = "“",
+  rdquo = "”",
+  laquo = "«",
+  raquo = "»",
+}
+
+local function decode_html_entities(text)
+  text = text:gsub("&#[xX](%x+);", function(hex)
+    return vim.fn.nr2char(tonumber(hex, 16), true)
+  end)
+  text = text:gsub("&#(%d+);", function(dec)
+    return vim.fn.nr2char(tonumber(dec), true)
+  end)
+  text = text:gsub("&(%a+);", function(name)
+    return html_entities[name]
+  end)
+  -- Last, so "&amp;lt;" ends up as "&lt;" and not "<"
+  return (text:gsub("&amp;", "&"))
+end
+
+local max_title_chars = 80
+
+-- Turn a raw title into text that is safe inside "[...]" (also in a table cell)
+function M._clean_title(title)
+  if type(title) ~= "string" then
+    return nil
+  end
+
+  title = decode_html_entities(title)
+  title = title:gsub("%s+", " "):gsub("%c", ""):gsub("^ ", ""):gsub(" $", "")
+  if title == "" then
+    return nil
+  end
+
+  if vim.fn.strchars(title) > max_title_chars then
+    title = vim.fn.strcharpart(title, 0, max_title_chars - 1):gsub(" $", "") .. "…"
+  end
+
+  -- The title is text from a stranger. Escape the backslash too: otherwise a title
+  -- like "x\\](https://evil)" closes the link text early and swaps the target.
+  -- "<" and ">" are escaped so a title cannot put HTML (e.g. a remote <img>) in the note.
+  return (title:gsub("[\\%[%]|<>]", "\\%0"))
+end
+
+-- Page title from HTML: og:title if present (no " | Site" suffix), else <title>
+function M._extract_title(html)
+  if type(html) ~= "string" then
+    return nil
+  end
+
+  for meta in html:gmatch "<[mM][eE][tT][aA]%s[^>]*>" do
+    if meta:match "[\"']og:title[\"']" then
+      local title = M._clean_title(meta:match 'content%s*=%s*"([^"]*)"' or meta:match "content%s*=%s*'([^']*)'")
+      if title then
+        return title
+      end
+    end
+  end
+
+  return M._clean_title(html:match "<[tT][iI][tT][lL][eE][^>]*>(.-)</[tT][iI][tT][lL][eE]>")
+end
+
+local fetch_timeout_s = 2
+local max_html_bytes = 200 * 1024
+
+-- Blocks for up to fetch_timeout_s. Returns nil when the page gives no usable title.
+local function fetch_page_title(url)
+  local ok, job = pcall(vim.system, {
+    "curl",
+    "--silent",
+    "--location",
+    "--compressed",
+    -- Take the URL literally: curl would expand "[1-100]" or "{a,b}" into many requests
+    "--globoff",
+    -- A redirect must not lead to another scheme
+    "--proto",
+    "=http,https",
+    "--proto-redir",
+    "=http,https",
+    "--max-redirs",
+    "5",
+    "--max-filesize",
+    "5M",
+    "--max-time",
+    tostring(fetch_timeout_s),
+    "--user-agent",
+    "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0",
+    "--",
+    url,
+  }, { text = false })
+  if not ok then
+    return nil
+  end
+
+  -- On a timeout curl still hands over what it got, and <title> sits at the top
+  local result = job:wait((fetch_timeout_s + 1) * 1000)
+  local html = result.stdout
+  if not html or html == "" then
+    return nil
+  end
+
+  return M._extract_title(html:sub(1, max_html_bytes))
+end
+
 -- Helper function to get and validate clipboard URL
 local function get_clipboard_url()
   -- Get clipboard content
@@ -150,8 +265,9 @@ local function get_clipboard_url()
   return clipboard_content
 end
 
--- Helper function to determine link text based on URL
-local function get_link_text(url)
+-- Helper function to determine link text based on URL.
+-- fetch_title: for a site without its own rule, ask the page for its title (network request)
+local function get_link_text(url, fetch_title)
   local link_text = "web" -- default
 
   if url:match "github%.com/[^/]+/[^/]+/issues/(%d+)" then
@@ -212,12 +328,17 @@ local function get_link_text(url)
         link_text = domain_name
       end
     end
+
+    if fetch_title then
+      link_text = fetch_page_title(url) or link_text
+    end
   end
 
   return link_text
 end
 
-M.smart_link_paste = function()
+-- before_cursor: false pastes like 'p' (after the cursor), true like 'P'
+local function paste_smart_link(before_cursor, fetch_title)
   -- Check if we're in a markdown file
   local filetype = vim.bo.filetype
   if filetype ~= "markdown" and filetype ~= "mdx" then
@@ -230,10 +351,9 @@ M.smart_link_paste = function()
     return
   end
 
-  local link_text = get_link_text(clipboard_content)
+  local link_text = get_link_text(clipboard_content, fetch_title)
   local markdown_link = string.format("[%s](%s)", link_text, clipboard_content)
 
-  -- Insert at cursor position (like 'p' - after cursor)
   local cursor_pos = vim.api.nvim_win_get_cursor(0)
   local current_line = vim.api.nvim_get_current_line()
   local col = cursor_pos[2]
@@ -241,44 +361,28 @@ M.smart_link_paste = function()
   -- Split the line at cursor position and insert the link
   local before = current_line:sub(1, col)
   local after = current_line:sub(col + 1)
-  local new_line = before .. " " .. markdown_link .. after
 
-  vim.api.nvim_set_current_line(new_line)
+  if before_cursor then
+    vim.api.nvim_set_current_line(before .. markdown_link .. " " .. after)
+    vim.api.nvim_win_set_cursor(0, { cursor_pos[1], col + #markdown_link })
+  else
+    vim.api.nvim_set_current_line(before .. " " .. markdown_link .. after)
+    vim.api.nvim_win_set_cursor(0, { cursor_pos[1], col + 1 + #markdown_link })
+  end
+end
 
-  -- Move cursor to end of inserted link
-  vim.api.nvim_win_set_cursor(0, { cursor_pos[1], col + 1 + #markdown_link })
+M.smart_link_paste = function()
+  paste_smart_link(false)
 end
 
 M.smart_link_paste_before = function()
-  -- Check if we're in a markdown file
-  local filetype = vim.bo.filetype
-  if filetype ~= "markdown" and filetype ~= "mdx" then
-    vim.notify("Smart link paste only works in markdown files", vim.log.levels.WARN)
-    return
-  end
+  paste_smart_link(true)
+end
 
-  local clipboard_content = get_clipboard_url()
-  if not clipboard_content then
-    return
-  end
-
-  local link_text = get_link_text(clipboard_content)
-  local markdown_link = string.format("[%s](%s)", link_text, clipboard_content)
-
-  -- Insert before cursor position (like 'P' - before cursor)
-  local cursor_pos = vim.api.nvim_win_get_cursor(0)
-  local current_line = vim.api.nvim_get_current_line()
-  local col = cursor_pos[2]
-
-  -- Split the line at cursor position and insert the link before
-  local before = current_line:sub(1, col)
-  local after = current_line:sub(col + 1)
-  local new_line = before .. markdown_link .. " " .. after
-
-  vim.api.nvim_set_current_line(new_line)
-
-  -- Move cursor to end of inserted link
-  vim.api.nvim_win_set_cursor(0, { cursor_pos[1], col + #markdown_link })
+-- Like smart_link_paste, but fetches the page title. Kept on its own key so that a
+-- request goes out only when asked for: fetching a one-time link can use it up.
+M.smart_link_paste_with_title = function()
+  paste_smart_link(false, true)
 end
 
 M.paste_as_codeblock = function()

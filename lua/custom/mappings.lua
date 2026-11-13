@@ -327,6 +327,12 @@ M.link_utils = {
       end,
       "Smart link paste (before cursor)",
     },
+    ["<leader>pf"] = {
+      function()
+        require("custom.link_utils").smart_link_paste_with_title()
+      end,
+      "Smart link paste with fetched page title",
+    },
     ["<leader>p`"] = {
       function()
         require("custom.link_utils").paste_as_codeblock()
