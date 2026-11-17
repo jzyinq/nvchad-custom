@@ -43,6 +43,11 @@ Everything in this repo is ours:
   URL alone and must never touch the network. Only `<leader>pf` fetches the page title (curl, 2 s
   cap), on purpose on its own key: fetching a one-time link (magic login, reset) can use it up.
   A fetched title is untrusted text; keep the escaping in `_clean_title`.
+- `gx` in normal mode (`open_link_on_line` in `lua/custom/link_utils.lua`, mapped in the gx.nvim
+  spec) opens what is under the cursor through gx.nvim; when the cursor is on nothing it opens the
+  line's only URL, or lists several numbered and opens the one whose digit is typed. "On nothing"
+  is decided by running gx's handlers with `search` off, because `search` matches any word. The
+  list raises `cmdheight` while it waits for the key; without that nvim adds a "Press ENTER" line.
 - `<leader>rr` runs `:restart` (reloads the whole config, restores the session).
 - Files changed on disk reload automatically (`autoread` + `:checktime` on focus/BufEnter/CursorHold,
   `CustomAutoReload` group in `lua/custom/init.lua`); `<leader>re` forces `:edit!` (drops unsaved edits).

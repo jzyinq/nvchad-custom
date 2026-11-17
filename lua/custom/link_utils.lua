@@ -371,6 +371,95 @@ local function paste_smart_link(before_cursor, fetch_title)
   end
 end
 
+-- Same URL character set as gx.nvim's url handler, so the line fallback opens
+-- exactly what gx would open with the cursor on the link.
+local line_url_pattern = "https?://[a-zA-Z%d_/%%%-%.~@\\+#=?&:*]+"
+
+-- Distinct URLs on the line, in order, as { url =, label = }. The label is the
+-- text of a markdown link ([label](url)) when the URL sits in one.
+M._urls_on_line = function(line)
+  local urls, seen = {}, {}
+  local init = 1
+  while true do
+    local s, e = line:find(line_url_pattern, init)
+    if not s then
+      break
+    end
+    local url = line:sub(s, e):gsub("\\([%p])", "%1")
+    if not seen[url] then
+      seen[url] = true
+      local label = line:sub(1, s - 1):match "%[([^%]]*)%]%($"
+      urls[#urls + 1] = { url = url, label = label ~= "" and label ~= url and label or nil }
+    end
+    init = e + 1
+  end
+  return urls
+end
+
+-- List the links numbered in the message area and open the one whose digit is typed.
+-- Any other key cancels. More than 9 links go through vim.ui.select instead.
+local function pick_url(urls, on_choice)
+  local function describe(item)
+    return item.label and (item.label .. "  " .. item.url) or item.url
+  end
+
+  if #urls > 9 then
+    vim.ui.select(urls, { prompt = "Open link:", format_item = describe }, function(item)
+      if item then
+        on_choice(item.url)
+      end
+    end)
+    return
+  end
+
+  local width = vim.o.columns - 6
+  local chunks = {}
+  for i, item in ipairs(urls) do
+    local text = describe(item)
+    if vim.fn.strdisplaywidth(text) > width then
+      text = vim.fn.strcharpart(text, 0, width - 1) .. "…"
+    end
+    chunks[#chunks + 1] = { i .. " ", "Number" }
+    chunks[#chunks + 1] = { text .. "\n" }
+  end
+  chunks[#chunks + 1] = { "Open link (1-" .. #urls .. "): ", "Question" }
+  -- make room for the list, otherwise nvim adds a "Press ENTER" line under it
+  local cmdheight = vim.o.cmdheight
+  vim.o.cmdheight = math.max(cmdheight, #urls + 1)
+  vim.cmd.redraw()
+  vim.api.nvim_echo(chunks, false, {})
+
+  local ok, key = pcall(vim.fn.getcharstr)
+  vim.api.nvim_echo({ { "" } }, false, {})
+  vim.o.cmdheight = cmdheight
+  vim.cmd.redraw()
+
+  local choice = ok and urls[tonumber(key)] or nil
+  if choice then
+    on_choice(choice.url)
+  end
+end
+
+-- gx: open what is under the cursor. If nothing is, open the line's only URL,
+-- or ask which one when the line has several.
+M.open_link_on_line = function()
+  local gx = require "gx"
+  local line = vim.api.nvim_get_current_line()
+
+  -- "search" matches any word, so ask the other handlers whether the cursor is on something
+  local handlers = vim.tbl_extend("force", {}, gx.options.handlers, { search = false })
+  local under_cursor = require("gx.handler").get_url("n", line, handlers, gx.options.handler_options)
+
+  local urls = #under_cursor == 0 and M._urls_on_line(line) or {}
+  if #urls == 1 then
+    vim.ui.open(urls[1].url)
+  elseif #urls > 1 then
+    pick_url(urls, vim.ui.open)
+  else
+    gx.open()
+  end
+end
+
 M.smart_link_paste = function()
   paste_smart_link(false)
 end

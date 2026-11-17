@@ -341,7 +341,16 @@ local plugins = {
 
   {
     "chrishrb/gx.nvim",
-    keys = { { "gx", "<cmd>Browse<cr>", mode = { "n", "x" } } },
+    keys = {
+      {
+        "gx",
+        function()
+          require("custom.link_utils").open_link_on_line()
+        end,
+        desc = "Open link under cursor, or pick from the links on the line",
+      },
+      { "gx", "<cmd>Browse<cr>", mode = "x" },
+    },
     cmd = { "Browse" },
     init = function()
       vim.g.netrw_nogx = 1 -- disable netrw gx
